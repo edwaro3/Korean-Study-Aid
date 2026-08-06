@@ -11,7 +11,7 @@
   --accent2:#e0aaff;--green:#4ecca3;--red:#ff6b6b;--text:#e0e0e0;
   --muted:#888;--border:#2e2e4e;
 }
-body{font-family:"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden}
+body{font-family:"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);height:100vh;height:100dvh;display:flex;flex-direction:column;overflow:hidden}
 /* ── header ──────────────────────────────────────────────── */
 #header{background:var(--panel);border-bottom:1px solid var(--border);padding:10px 20px;display:flex;align-items:center;gap:16px;flex-shrink:0}
 #header h1{font-size:16px;font-weight:600;color:var(--accent);white-space:nowrap}
@@ -1071,6 +1071,16 @@ function escHtml(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace
 
 // ── Init ──────────────────────────────────────────────────
 buildSidebar();
+
+// ── Mobile sidebar toggle ─────────────────────────────────
+(function(){
+  const sidebar=document.getElementById('sidebar');
+  const backdrop=document.getElementById('sidebar-backdrop');
+  function closeSidebar(){ sidebar.classList.remove('open'); backdrop.classList.remove('open'); }
+  document.getElementById('btn-menu').addEventListener('click',()=>{ sidebar.classList.add('open'); backdrop.classList.add('open'); });
+  backdrop.addEventListener('click',closeSidebar);
+  window.closeSidebar=closeSidebar;
+})();
 
 // ── Vocabulary SRS ────────────────────────────────────
 (function(){
