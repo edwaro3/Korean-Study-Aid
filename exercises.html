@@ -1,0 +1,1493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Korean Grammar Practice — TTMIK L1 + L2</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f0f1a;--panel:#1a1a2e;--card:#22223b;--accent:#a8d8ea;
+  --accent2:#e0aaff;--green:#4ecca3;--red:#ff6b6b;--text:#e0e0e0;
+  --muted:#888;--border:#2e2e4e;
+}
+body{font-family:"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden}
+/* ── header ──────────────────────────────────────────────── */
+#header{background:var(--panel);border-bottom:1px solid var(--border);padding:10px 20px;display:flex;align-items:center;gap:16px;flex-shrink:0}
+#header h1{font-size:16px;font-weight:600;color:var(--accent);white-space:nowrap}
+#score-box{margin-left:auto;font-size:13px;color:var(--muted);white-space:nowrap}
+#score-box span{color:var(--text);font-weight:600}
+#ime-tip{font-size:11px;color:var(--muted);background:#1e1e32;border:1px solid var(--border);border-radius:6px;padding:4px 10px;white-space:nowrap}
+/* ── layout ───────────────────────────────────────────────── */
+#app{display:flex;flex:1;overflow:hidden}
+/* ── sidebar ──────────────────────────────────────────────── */
+#sidebar{width:260px;flex-shrink:0;background:var(--panel);border-right:1px solid var(--border);overflow-y:auto;padding:10px 0}
+#sidebar::-webkit-scrollbar{width:4px}
+#sidebar::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.level-group{margin-bottom:4px}
+.level-header{padding:8px 16px 4px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
+.lesson-btn{width:100%;text-align:left;background:none;border:none;padding:7px 16px 7px 20px;cursor:pointer;color:var(--text);font-size:13px;display:flex;align-items:center;gap:6px;border-left:3px solid transparent;transition:background .15s,border-color .15s}
+.lesson-btn:hover{background:#ffffff0d}
+.lesson-btn.active{background:#ffffff12;border-left-color:var(--accent);color:var(--accent)}
+.lesson-btn .check{font-size:11px;color:var(--green);margin-left:4px;opacity:0;transition:opacity .2s}
+.lesson-btn .check.show{opacity:1}
+.lesson-btn.done{border-left-color:var(--green)}
+.lesson-btn.done .bg-ref{color:#4ecca355}
+.lesson-btn .bg-ref{font-size:10px;color:var(--muted);margin-left:auto;white-space:nowrap}
+/* ── main ─────────────────────────────────────────────────── */
+#main{flex:1;overflow-y:auto;display:flex;align-items:flex-start;justify-content:center;padding:32px 20px}
+#main::-webkit-scrollbar{width:5px}
+#main::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+#exercise-wrap{width:100%;max-width:660px}
+/* empty state */
+#empty{text-align:center;padding:80px 20px;color:var(--muted)}
+#empty p{font-size:18px;margin-bottom:8px}
+/* lesson heading */
+#lesson-header{margin-bottom:24px}
+#lesson-title{font-size:22px;font-weight:700;color:var(--accent);margin-bottom:4px}
+#lesson-meta{font-size:13px;color:var(--muted);display:flex;gap:12px;align-items:center}
+#lesson-meta .bg-tag{background:#ffffff0d;border:1px solid var(--border);border-radius:4px;padding:2px 8px;font-size:11px}
+/* progress bar */
+#prog-bar-wrap{background:var(--border);border-radius:4px;height:4px;margin-bottom:24px;overflow:hidden}
+#prog-bar{height:100%;background:var(--accent);border-radius:4px;transition:width .3s}
+/* exercise card */
+#ex-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:28px;margin-bottom:20px}
+#ex-type-badge{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;padding:3px 10px;border-radius:20px;margin-bottom:16px}
+.badge-translate{background:#1e3a5f;color:#7ec8e3}
+.badge-wordbank{background:#2d1f47;color:#c084fc}
+.badge-fillinblank{background:#1f3d2b;color:#6ee7b7}
+#ex-prompt{font-size:20px;font-weight:500;margin-bottom:20px;line-height:1.5;color:#f0f0f0}
+/* translate */
+#translate-area textarea{width:100%;background:#0f0f1a;border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:18px;padding:12px;resize:vertical;min-height:80px;font-family:inherit;outline:none;transition:border-color .2s}
+#translate-area textarea:focus{border-color:var(--accent)}
+/* word bank */
+#wordbank-area{}
+#wb-tiles{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;min-height:46px;background:#0f0f1a;border:1px solid var(--border);border-radius:8px;padding:10px}
+#wb-built{display:flex;flex-wrap:wrap;gap:8px;min-height:46px;background:#0f0f1a;border:1px dashed var(--accent);border-radius:8px;padding:10px}
+.wb-tile{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:6px 12px;cursor:pointer;font-size:16px;color:var(--text);transition:background .15s,border-color .15s;user-select:none}
+.wb-tile:hover{background:#2e2e50;border-color:var(--accent2)}
+.wb-tile.built{background:#1f1f3a;border-color:var(--accent2);color:var(--accent2)}
+.wb-label{font-size:11px;color:var(--muted);margin-bottom:6px;letter-spacing:.5px}
+/* fill in blank */
+#fib-sentence{font-size:20px;line-height:1.8;margin-bottom:16px;color:#f0f0f0}
+#fib-sentence .blank-slot{display:inline-block;min-width:80px;border-bottom:2px solid var(--accent);text-align:center;padding:0 4px;color:var(--accent);font-weight:600;vertical-align:bottom}
+#fib-input{background:#0f0f1a;border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:18px;padding:10px 14px;width:100%;max-width:260px;font-family:inherit;outline:none;transition:border-color .2s}
+#fib-input:focus{border-color:var(--accent)}
+#fib-hint{font-size:12px;color:var(--muted);margin-top:8px}
+/* feedback */
+#feedback{display:none;border-radius:10px;padding:14px 18px;margin-top:16px;font-size:15px}
+#feedback.correct{background:#1a3d2b;border:1px solid #4ecca355;color:var(--green)}
+#feedback.incorrect{background:#3d1a1a;border:1px solid #ff6b6b55;color:var(--red)}
+#feedback.reveal{background:#1a2535;border:1px solid #7ec8e355;color:#7ec8e3}
+#answer-reveal{font-size:20px;font-weight:700;color:var(--accent);margin-top:6px}
+/* self-mark (translate) */
+#self-mark{display:none;gap:10px;margin-top:12px}
+#self-mark button{flex:1;padding:10px;border-radius:8px;border:none;cursor:pointer;font-size:14px;font-weight:600;transition:opacity .2s}
+#btn-correct{background:#1a3d2b;color:var(--green);border:1px solid #4ecca355}
+#btn-incorrect{background:#3d1a1a;color:var(--red);border:1px solid #ff6b6b55}
+#btn-correct:hover,#btn-incorrect:hover{opacity:.8}
+/* actions */
+#actions{display:flex;gap:10px;align-items:center;margin-top:20px}
+#btn-check{background:var(--accent);color:#0f0f1a;border:none;border-radius:8px;padding:11px 28px;font-size:15px;font-weight:700;cursor:pointer;transition:opacity .2s}
+#btn-check:hover{opacity:.85}
+#btn-check:disabled{opacity:.35;cursor:default}
+#btn-next{background:none;border:1px solid var(--border);color:var(--text);border-radius:8px;padding:11px 24px;font-size:15px;cursor:pointer;display:none;transition:background .2s}
+#btn-next:hover{background:#ffffff0d}
+#btn-audio{background:none;border:1px solid var(--border);border-radius:8px;padding:11px 14px;cursor:pointer;font-size:16px;display:none;transition:background .2s}
+#btn-audio:hover{background:#ffffff0d}
+/* all-done */
+#all-done{display:none;text-align:center;padding:40px 20px}
+#all-done .trophy{font-size:56px;margin-bottom:12px}
+#all-done h2{font-size:22px;color:var(--green);margin-bottom:8px}
+#all-done p{color:var(--muted);margin-bottom:20px}
+#btn-restart{background:var(--green);color:#0f0f1a;border:none;border-radius:8px;padding:11px 28px;font-size:15px;font-weight:700;cursor:pointer}
+/* ── Mistakes review panel ─────────────────────────────── */
+#review-wrap{width:100%;max-width:660px}
+#review-header{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+#review-header h2{font-size:20px;font-weight:700;color:var(--accent);margin:0;flex:1}
+#btn-clear-all{background:none;border:1px solid #ff6b6b44;color:#ff6b6b;border-radius:7px;padding:6px 14px;font-size:12px;cursor:pointer}
+#btn-clear-all:hover{background:#3d1a1a}
+.rev-lesson{margin-bottom:20px}
+.rev-lesson-title{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--border)}
+.rev-item{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin-bottom:6px;font-size:13px;display:flex;gap:10px;align-items:flex-start}
+.rev-item-body{flex:1}
+.rev-prompt{color:var(--muted);font-size:12px;margin-bottom:4px}
+.rev-correct{color:#4ecca3;font-weight:600}
+.rev-yours{color:#ff6b6b;text-decoration:line-through;margin-right:8px;opacity:.8}
+.rev-date{font-size:10px;color:var(--muted);opacity:.5;margin-top:3px}
+.rev-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:2px 4px;opacity:.5;transition:opacity .15s}
+.rev-del:hover{opacity:1;color:#ff6b6b}
+#review-empty{text-align:center;padding:60px 20px;color:var(--muted)}
+.mbadge{font-size:10px;background:#3d1a1a;color:#ff6b6b;border-radius:10px;padding:1px 7px;margin-left:auto}
+#done-mistakes{margin-top:18px;text-align:left;width:100%;max-height:300px;overflow-y:auto}
+#done-mistakes h3{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin:0 0 10px}
+.miss-item{background:#1e1e36;border-radius:8px;padding:10px 14px;margin-bottom:8px;font-size:13px}
+.miss-prompt{color:var(--muted);font-size:12px;margin-bottom:5px}
+.miss-correct{color:#4ecca3;font-weight:600}
+.miss-yours{color:#ff6b6b;text-decoration:line-through;margin-right:10px;opacity:.8}
+/* ── Vocab SRS ─────────────────────────────────────────── */
+#vocab-wrap{width:100%;max-width:580px}
+#vc-header{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+#vc-title{font-size:18px;font-weight:700;color:var(--accent)}
+#vc-stats{display:flex;gap:8px;margin-left:auto;font-size:12px}
+#vc-stats span{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:2px 10px;color:var(--muted)}
+#vc-stats span b{color:var(--text)}
+.vc-dir-row{display:flex;gap:6px;margin-bottom:14px}
+.vd-btn{background:none;border:1px solid var(--border);border-radius:6px;padding:5px 12px;font-size:12px;color:var(--muted);cursor:pointer;transition:background .15s,color .15s}
+.vd-btn.active{background:#1a2a45;border-color:var(--accent);color:var(--accent)}
+#vc-flash{perspective:1200px;height:220px;margin:0 auto 14px;max-width:100%}
+#vc-inner{position:relative;width:100%;height:100%;transition:transform .5s cubic-bezier(.4,0,.2,1);transform-style:preserve-3d;cursor:pointer}
+#vc-flash.flip #vc-inner{transform:rotateY(180deg)}
+.vc-face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:14px;border:1px solid var(--border);background:var(--card);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 28px;text-align:center;box-shadow:0 4px 28px #00000055;transition:border-color .15s}
+#vc-flash:not(.flip) #vc-inner:hover .vc-face:first-child{border-color:var(--accent)}
+.vc-face-back{transform:rotateY(180deg);background:#18182e}
+.vc-flip-tip{position:absolute;bottom:10px;font-size:10px;color:var(--muted);opacity:.4;letter-spacing:.5px;pointer-events:none}
+.vc-back-label{position:absolute;top:12px;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+#vc-tag{position:absolute;top:12px;left:16px;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted)}
+#vc-new-badge{position:absolute;top:12px;right:16px;font-size:10px;background:#1a3050;color:var(--accent);border-radius:10px;padding:1px 8px}
+#vc-q{font-size:30px;font-weight:500;color:#f0f0f0;line-height:1.5}
+#vc-q.kr{font-size:46px;font-weight:700;color:var(--accent)}
+#vc-ans{font-size:36px;font-weight:700;color:var(--accent);line-height:1.4}
+#vc-ans.en{font-size:26px;color:#f0f0f0;font-weight:500}
+#vc-due-toggle{cursor:pointer;text-decoration:underline dotted}
+#btn-vc-settings{background:none;border:none;font-size:16px;cursor:pointer;color:var(--muted);padding:4px;line-height:1;transition:color .15s}
+#btn-vc-settings:hover,#btn-vc-settings.open{color:var(--accent)}
+#vc-settings{background:#13132a;border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin-bottom:14px;display:none;gap:20px;flex-wrap:wrap}
+#vc-settings.open{display:flex}
+.vc-set-group{display:flex;flex-direction:column;gap:6px;min-width:130px}
+.vc-set-group label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.vc-set-group input[type=number]{background:#0f0f1a;border:1px solid var(--border);border-radius:6px;color:#f0f0f0;font-size:15px;padding:6px 10px;width:80px}
+.vc-set-hint{font-size:11px;color:var(--muted);margin-top:2px}
+#vc-due-list{background:#13132a;border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin-bottom:14px;display:none;max-height:260px;overflow-y:auto}
+#vc-due-list.open{display:block}
+#vc-due-list h3{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin:0 0 10px}
+.vc-due-item{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #1e1e36;gap:12px}
+.vc-due-item:last-child{border-bottom:none}
+.vc-due-kr{color:var(--accent);font-size:17px;font-weight:600}
+.vc-due-en{color:var(--muted);font-size:13px;text-align:right}
+#vc-flip-row{display:flex;gap:10px;margin-bottom:10px}
+#btn-vcflip{background:var(--accent);color:#0f0f1a;border:none;border-radius:8px;padding:12px 36px;font-size:15px;font-weight:700;cursor:pointer;transition:opacity .2s}
+#btn-vcflip:hover{opacity:.85}
+#btn-vcaudio{background:none;border:1px solid var(--border);border-radius:8px;padding:12px 14px;cursor:pointer;font-size:16px;transition:background .2s}
+#btn-vcaudio:hover{background:#ffffff0d}
+#vc-rate-row{display:none;gap:8px;margin-bottom:20px}
+.vcr{border:none;border-radius:8px;padding:10px 0;font-size:13px;font-weight:700;cursor:pointer;flex:1;display:flex;flex-direction:column;align-items:center;transition:opacity .2s}
+.vcr:hover{opacity:.8}
+.vcr small{font-size:10px;font-weight:400;opacity:.75;margin-top:2px}
+#vcr-again{background:#3d1a1a;color:#ff6b6b;border:1px solid #ff6b6b44}
+#vcr-hard{background:#2d1f10;color:#f4a261;border:1px solid #f4a26144}
+#vcr-good{background:#1a3d2b;color:#4ecca3;border:1px solid #4ecca344}
+#vcr-easy{background:#1a2a45;color:var(--accent);border:1px solid #a8d8ea44}
+#vc-done{text-align:center;padding:60px 20px}
+.vtrophy{font-size:56px;margin-bottom:12px}
+#vc-done h2{font-size:22px;color:var(--green);margin-bottom:8px}
+#vc-done p{color:var(--muted);margin-bottom:20px}
+.vc-again-btn{background:var(--green);color:#0f0f1a;border:none;border-radius:8px;padding:11px 28px;font-size:15px;font-weight:700;cursor:pointer}
+.vbadge{font-size:10px;background:#1a2a45;color:var(--accent);border-radius:10px;padding:1px 7px;margin-left:auto}
+/* ── Korean virtual keyboard ──────────────────────────────── */
+#kor-kb{position:fixed;bottom:0;left:0;right:0;background:#14142a;border-top:2px solid var(--border);padding:8px 8px 16px;z-index:100;box-shadow:0 -4px 20px #00000066;display:none}
+.kb-row{display:flex;gap:4px;justify-content:center;margin-bottom:4px}
+.kb-key{background:#252538;border:1px solid var(--border);border-radius:7px;color:var(--text);cursor:pointer;font-size:17px;min-width:38px;padding:7px 6px;text-align:center;user-select:none;transition:background .08s;position:relative;line-height:1.2;-webkit-tap-highlight-color:transparent}
+.kb-key:hover,.kb-key:active{background:#363655}
+.kb-key .ks{position:absolute;top:2px;right:3px;font-size:9px;color:var(--muted)}
+.kb-sep{width:12px;flex-shrink:0}
+.kb-special{font-size:12px;background:#1d1d30;min-width:56px}
+.kb-space{min-width:130px}
+#kb-shift.kb-on{background:#1a2a45;border-color:var(--accent);color:var(--accent)}
+#btn-kb{background:none;border:1px solid var(--border);border-radius:6px;color:var(--muted);cursor:pointer;font-size:12px;padding:4px 10px;transition:background .2s,color .2s;white-space:nowrap}
+#btn-kb.on{background:#1a2a45;border-color:var(--accent);color:var(--accent)}
+</style>
+</head>
+<body>
+<div id="header">
+  <h1>Korean Grammar Practice</h1>
+  <span id="ime-tip">💡 Win: Win+Space → Korean IME &nbsp;|&nbsp; Mac: Ctrl+Space</span>
+  <div id="score-box">Session: <span id="sc-correct">0</span> / <span id="sc-total">0</span></div>
+  <button id="btn-kb" title="Toggle Korean keyboard">⌨ 한글</button>
+</div>
+<div id="app">
+  <nav id="sidebar"></nav>
+  <main id="main">
+    <div id="exercise-wrap">
+      <div id="review-wrap" style="display:none">
+        <div id="review-header">
+          <h2>📝 Mistakes Log</h2>
+          <button id="btn-clear-all">Clear all</button>
+        </div>
+        <div id="review-list"></div>
+      </div>
+      <div id="empty"><p>👈 Pick a lesson to begin</p><small>55 grammar lessons across TTMIK Level 1 &amp; 2</small></div>
+      <div id="lesson-header" style="display:none">
+        <div id="lesson-title"></div>
+        <div id="lesson-meta"><span id="lesson-level-tag"></span><span id="lesson-bg-ref" class="bg-tag"></span></div>
+      </div>
+      <div id="prog-bar-wrap" style="display:none"><div id="prog-bar"></div></div>
+      <div id="ex-card" style="display:none">
+        <div id="ex-type-badge"></div>
+        <div id="ex-prompt"></div>
+        <!-- translate -->
+        <div id="translate-area" style="display:none">
+          <textarea id="translate-input" placeholder="Type in Korean…" rows="3" spellcheck="false" autocomplete="off"></textarea>
+        </div>
+        <!-- word bank -->
+        <div id="wordbank-area" style="display:none">
+          <div class="wb-label">TILES</div>
+          <div id="wb-tiles"></div>
+          <div class="wb-label" style="margin-top:10px">YOUR ANSWER — click tiles above to add, click below to remove</div>
+          <div id="wb-built"></div>
+        </div>
+        <!-- fill in blank -->
+        <div id="fib-area" style="display:none">
+          <div id="fib-sentence"></div>
+          <input id="fib-input" type="text" placeholder="Fill in the blank…" autocomplete="off" spellcheck="false">
+          <div id="fib-hint"></div>
+        </div>
+        <div id="feedback"></div>
+        <div id="self-mark"><button id="btn-correct">✓ Got it right</button><button id="btn-incorrect">✗ Got it wrong</button></div>
+      </div>
+      <div id="actions" style="display:none">
+        <button id="btn-check">Check</button>
+        <button id="btn-next">Next →</button>
+        <button id="btn-audio" title="Hear Korean">🔊</button>
+      </div>
+      <div id="all-done">
+        <div class="trophy">🎉</div>
+        <h2>Lesson complete!</h2>
+        <p id="done-score"></p>
+        <div id="done-mistakes"></div>
+        <button id="btn-restart" style="margin-top:18px">Restart lesson</button>
+      </div>
+    </div>
+    <div id="vocab-wrap" style="display:none">
+      <div id="vc-header">
+        <div id="vc-title">📚 TOPIK I Vocabulary</div>
+        <div id="vc-stats"><span id="vc-due-toggle" title="Show due words">Due <b id="vs-due">–</b></span><span>New <b id="vs-new">–</b></span></div>
+        <button id="btn-vc-settings" title="Settings">⚙</button>
+      </div>
+      <div id="vc-settings">
+        <div class="vc-set-group">
+          <label for="set-new-per-day">New cards / day</label>
+          <input type="number" id="set-new-per-day" min="1" max="500" value="20">
+          <span class="vc-set-hint">Restarts next session</span>
+        </div>
+        <div class="vc-set-group">
+          <label for="set-max-reviews">Max reviews / day</label>
+          <input type="number" id="set-max-reviews" min="0" max="9999" value="0" placeholder="∞">
+          <span class="vc-set-hint">0 = no limit</span>
+        </div>
+        <div class="vc-set-group" style="justify-content:flex-end">
+          <button id="btn-vc-reset" style="background:#3d1a1a;color:#ff6b6b;border:1px solid #ff6b6b44;border-radius:7px;padding:7px 14px;font-size:13px;cursor:pointer">Reset all progress</button>
+          <span class="vc-set-hint">Clears all SRS data</span>
+        </div>
+      </div>
+      <div id="vc-due-list">
+        <h3>Due for review (<span id="vc-due-count">0</span>)</h3>
+        <div id="vc-due-items"></div>
+      </div>
+      <div class="vc-dir-row" id="vc-dir-row">
+        <button class="vd-btn active" data-dir="both">Both</button>
+        <button class="vd-btn" data-dir="en-kr">En → 한</button>
+        <button class="vd-btn" data-dir="kr-en">한 → En</button>
+      </div>
+      <div id="vc-flash">
+        <div id="vc-inner">
+          <div class="vc-face">
+            <div id="vc-tag"></div>
+            <div id="vc-new-badge" style="display:none">NEW</div>
+            <div id="vc-q"></div>
+            <div class="vc-flip-tip">click to flip</div>
+          </div>
+          <div class="vc-face vc-face-back">
+            <div class="vc-back-label">answer</div>
+            <div id="vc-ans"></div>
+          </div>
+        </div>
+      </div>
+      <div id="vc-flip-row">
+        <button id="btn-vcflip">Flip ↓</button>
+        <button id="btn-vcaudio" title="Hear Korean">🔊</button>
+      </div>
+      <div id="vc-rate-row">
+        <button class="vcr" id="vcr-again">Again<small id="vi-again"></small></button>
+        <button class="vcr" id="vcr-hard">Hard<small id="vi-hard"></small></button>
+        <button class="vcr" id="vcr-good">Good<small id="vi-good"></small></button>
+        <button class="vcr" id="vcr-easy">Easy<small id="vi-easy"></small></button>
+      </div>
+      <div id="vc-done" style="display:none">
+        <div class="vtrophy">🎉</div>
+        <h2>All done for now!</h2>
+        <p id="vc-done-msg"></p>
+        <button class="vc-again-btn" id="btn-vc-restart">Study More</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div id="kor-kb"></div>
+<script src="vocab_data.js"></script>
+<script>
+// ── Lesson data ────────────────────────────────────────────────────────────
+// Each lesson: id, level, title (TTMIK), billyGo (lesson #s), exercises[]
+// Exercise types:
+//   translate  – prompt(en) → answer(kr)
+//   wordbank   – prompt(en), answer(kr), words[](shuffled tiles)
+//   fillinblank– sentence(kr with ____), answer(kr blank), hint(en)
+
+const LESSONS = [
+// ════════════════════════ LEVEL 1 ════════════════════════
+{id:"l1-1",level:1,title:"Hello & Thank You",billyGo:[10,12],exercises:[
+  {type:"translate",prompt:"Hello!",answer:"안녕하세요!"},
+  {type:"translate",prompt:"Thank you very much.",answer:"정말 감사합니다."},
+  {type:"fillinblank",sentence:"안녕하세요, ____합니다.",answer:"감사",hint:"thank (감사합니다)"},
+  {type:"wordbank",prompt:"Say 'Thank you' to your teacher.",answer:"선생님, 감사합니다",words:["선생님","감사합니다"]},
+  {type:"fillinblank",sentence:"____ 하세요.",answer:"안녕",hint:"Hello / Goodbye (안녕하세요)"},
+]},
+{id:"l1-2",level:1,title:"Yes, No, What?",billyGo:[39,44],exercises:[
+  {type:"translate",prompt:"Yes.",answer:"네."},
+  {type:"translate",prompt:"No.",answer:"아니요."},
+  {type:"fillinblank",sentence:"____, 맞아요.",answer:"네",hint:"Yes, that's right."},
+  {type:"wordbank",prompt:"Say 'No, that's not right.'",answer:"아니요 맞지 않아요",words:["아니요","맞지","않아요"]},
+  {type:"fillinblank",sentence:"네? ____라고요?",answer:"뭐",hint:"What did you say?"},
+]},
+{id:"l1-3",level:1,title:"Goodbye",billyGo:[10],exercises:[
+  {type:"translate",prompt:"Goodbye. (you are staying, they are leaving)",answer:"안녕히 가세요."},
+  {type:"translate",prompt:"Goodbye. (you are leaving, they are staying)",answer:"안녕히 계세요."},
+  {type:"fillinblank",sentence:"안녕히 ____.",answer:"가세요",hint:"Goodbye — they are leaving, you stay"},
+  {type:"wordbank",prompt:"Say goodbye when you are staying behind.",answer:"안녕히 가세요",words:["안녕히","가세요"]},
+]},
+{id:"l1-4",level:1,title:"Sorry & Excuse Me",billyGo:[13,30],exercises:[
+  {type:"translate",prompt:"I'm sorry. (formal)",answer:"죄송합니다."},
+  {type:"translate",prompt:"Excuse me! (to get attention)",answer:"저기요!"},
+  {type:"fillinblank",sentence:"____합니다. 제 잘못이에요.",answer:"죄송",hint:"I'm very sorry"},
+  {type:"wordbank",prompt:"Get someone's attention politely",answer:"저기요 잠깐만요",words:["저기요","잠깐만요"]},
+]},
+{id:"l1-5",level:1,title:"이에요 / 예요 (It is…)",billyGo:[11],exercises:[
+  {type:"translate",prompt:"I am a student.",answer:"저는 학생이에요."},
+  {type:"translate",prompt:"This is coffee.",answer:"이거 커피예요."},
+  {type:"fillinblank",sentence:"저는 선생님____.",answer:"이에요",hint:"-이에요 after consonant"},
+  {type:"wordbank",prompt:"'My name is [name].'",answer:"제 이름은 민수예요",words:["제","이름은","민수예요"]},
+  {type:"fillinblank",sentence:"이거 책____.",answer:"이에요",hint:"책 ends in a consonant"},
+]},
+{id:"l1-6",level:1,title:"이거 뭐예요? (What is this?)",billyGo:[18,39,44],exercises:[
+  {type:"translate",prompt:"What is this?",answer:"이거 뭐예요?"},
+  {type:"translate",prompt:"This is my bag.",answer:"이거 제 가방이에요."},
+  {type:"fillinblank",sentence:"이거 ____ 예요?",answer:"뭐",hint:"What"},
+  {type:"wordbank",prompt:"Ask the price of this item.",answer:"이거 얼마예요",words:["이거","얼마예요"]},
+]},
+{id:"l1-7",level:1,title:"이 / 그 / 저 (This, That, It)",billyGo:[18],exercises:[
+  {type:"translate",prompt:"That (over there) is a school.",answer:"저거 학교예요."},
+  {type:"translate",prompt:"That (near you) is a phone.",answer:"그거 전화기예요."},
+  {type:"fillinblank",sentence:"____ 가방이에요.",answer:"이거",hint:"This thing (near me)"},
+  {type:"wordbank",prompt:"'That restaurant over there is good.'",answer:"저 식당이 좋아요",words:["저","식당이","좋아요"]},
+  {type:"fillinblank",sentence:"____ 사람이 누구예요?",answer:"그",hint:"That person (already mentioned)"},
+]},
+{id:"l1-8",level:1,title:"아니에요 (It is NOT…)",billyGo:[46],exercises:[
+  {type:"translate",prompt:"I am not a teacher.",answer:"저는 선생님이 아니에요."},
+  {type:"translate",prompt:"This is not water.",answer:"이거 물이 아니에요."},
+  {type:"fillinblank",sentence:"저는 학생이 ____.",answer:"아니에요",hint:"am not"},
+  {type:"wordbank",prompt:"'That is not a book.'",answer:"그거 책이 아니에요",words:["그거","책이","아니에요"]},
+]},
+{id:"l1-9",level:1,title:"은 / 는 and 이 / 가 (Particles)",billyGo:[17,26],exercises:[
+  {type:"translate",prompt:"I study Korean. (topic: I)",answer:"저는 한국어를 공부해요."},
+  {type:"translate",prompt:"My friend is here. (subject: friend)",answer:"친구가 여기 있어요."},
+  {type:"fillinblank",sentence:"저____ 학생이에요.",answer:"는",hint:"topic marker after vowel"},
+  {type:"wordbank",prompt:"'A cat is in the room.' (subject marker)",answer:"고양이가 방에 있어요",words:["고양이가","방에","있어요"]},
+  {type:"fillinblank",sentence:"커피____ 맛있어요.",answer:"가",hint:"subject marker after vowel"},
+]},
+{id:"l1-10",level:1,title:"있어요 / 없어요 (Have / There is)",billyGo:[53],exercises:[
+  {type:"translate",prompt:"I have money.",answer:"저는 돈이 있어요."},
+  {type:"translate",prompt:"There is no time.",answer:"시간이 없어요."},
+  {type:"fillinblank",sentence:"집에 강아지가 ____.",answer:"있어요",hint:"There is a puppy at home"},
+  {type:"wordbank",prompt:"'I don't have a car.'",answer:"저는 자동차가 없어요",words:["저는","자동차가","없어요"]},
+  {type:"fillinblank",sentence:"오늘 수업이 ____.",answer:"없어요",hint:"There is no class today"},
+]},
+{id:"l1-11",level:1,title:"주세요 (Please give me)",billyGo:[31,32],exercises:[
+  {type:"translate",prompt:"Please give me water.",answer:"물 주세요."},
+  {type:"translate",prompt:"Please give me that.",answer:"그거 주세요."},
+  {type:"fillinblank",sentence:"커피 한 잔 ____.",answer:"주세요",hint:"please give me"},
+  {type:"wordbank",prompt:"Order bread at a café.",answer:"빵 두 개 주세요",words:["빵","두","개","주세요"]},
+]},
+{id:"l1-12",level:1,title:"맛있어요 / 잘 먹겠습니다",billyGo:[],exercises:[
+  {type:"translate",prompt:"This is delicious!",answer:"맛있어요!"},
+  {type:"translate",prompt:"Thank you for the food. (before eating)",answer:"잘 먹겠습니다."},
+  {type:"fillinblank",sentence:"이 김치찌개가 정말 ____.",answer:"맛있어요",hint:"delicious"},
+  {type:"wordbank",prompt:"Say it tastes bad.",answer:"맛없어요",words:["맛없어요"]},
+]},
+{id:"l1-13",level:1,title:"-고 싶어요 (I want to…)",billyGo:[96],exercises:[
+  {type:"translate",prompt:"I want to eat.",answer:"먹고 싶어요."},
+  {type:"translate",prompt:"I want to go to Korea.",answer:"한국에 가고 싶어요."},
+  {type:"fillinblank",sentence:"저는 커피를 마시____ 싶어요.",answer:"고",hint:"want to drink"},
+  {type:"wordbank",prompt:"'I want to learn Korean.'",answer:"한국어를 배우고 싶어요",words:["한국어를","배우고","싶어요"]},
+  {type:"fillinblank",sentence:"집에서 쉬____ 싶어요.",answer:"고",hint:"want to rest (쉬다)"},
+]},
+{id:"l1-14",level:1,title:"뭐 -고 싶어요? (What do you want to do?)",billyGo:[96,44],exercises:[
+  {type:"translate",prompt:"What do you want to eat?",answer:"뭐 먹고 싶어요?"},
+  {type:"translate",prompt:"What do you want to do today?",answer:"오늘 뭐 하고 싶어요?"},
+  {type:"fillinblank",sentence:"주말에 뭐 ____ 싶어요?",answer:"하고",hint:"want to do on the weekend"},
+  {type:"wordbank",prompt:"Ask what they want to drink.",answer:"뭐 마시고 싶어요",words:["뭐","마시고","싶어요"]},
+]},
+{id:"l1-15",level:1,title:"Sino-Korean Numbers (일 이 삼…)",billyGo:[61,63],exercises:[
+  {type:"translate",prompt:"1, 2, 3, 4, 5 (Sino-Korean)",answer:"일, 이, 삼, 사, 오"},
+  {type:"translate",prompt:"The price is 5,000 won.",answer:"오천 원이에요."},
+  {type:"fillinblank",sentence:"____ 월 십오 일이에요.",answer:"삼",hint:"March 15th"},
+  {type:"wordbank",prompt:"'My phone number starts with 010.'",answer:"전화번호가 공일공으로 시작해요",words:["전화번호가","공일공으로","시작해요"]},
+  {type:"fillinblank",sentence:"만 ____ 이에요.",answer:"원",hint:"10,000 won"},
+]},
+{id:"l1-16",level:1,title:"Basic Present Tense (-아/어요)",billyGo:[20,23],exercises:[
+  {type:"translate",prompt:"I eat breakfast.",answer:"아침을 먹어요."},
+  {type:"translate",prompt:"My friend drinks coffee.",answer:"친구가 커피를 마셔요."},
+  {type:"fillinblank",sentence:"저는 매일 운동을 ____.",answer:"해요",hint:"하다 → 해요"},
+  {type:"wordbank",prompt:"'I read a book every day.'",answer:"매일 책을 읽어요",words:["매일","책을","읽어요"]},
+  {type:"fillinblank",sentence:"친구가 음악을 ____.",answer:"들어요",hint:"듣다 → 들어요"},
+]},
+{id:"l1-17",level:1,title:"Past Tense (-았/었어요)",billyGo:[42],exercises:[
+  {type:"translate",prompt:"I ate rice.",answer:"밥을 먹었어요."},
+  {type:"translate",prompt:"I went to school.",answer:"학교에 갔어요."},
+  {type:"fillinblank",sentence:"어제 친구를 ____.",answer:"만났어요",hint:"met (만나다 → 만났어요)"},
+  {type:"wordbank",prompt:"'I studied Korean yesterday.'",answer:"어제 한국어를 공부했어요",words:["어제","한국어를","공부했어요"]},
+  {type:"fillinblank",sentence:"지난 주말에 영화를 ____.",answer:"봤어요",hint:"watched (보다 → 봤어요)"},
+]},
+{id:"l1-18",level:1,title:"Location Particles (어디, -에, -에서)",billyGo:[22,36,45],exercises:[
+  {type:"translate",prompt:"Where is the bathroom?",answer:"화장실이 어디예요?"},
+  {type:"translate",prompt:"I study at the library.",answer:"도서관에서 공부해요."},
+  {type:"fillinblank",sentence:"저는 학교____ 공부해요.",answer:"에서",hint:"-에서 marks where an action takes place"},
+  {type:"wordbank",prompt:"'I am at home.'",answer:"저는 집에 있어요",words:["저는","집에","있어요"]},
+  {type:"fillinblank",sentence:"주말에 공원____ 산책해요.",answer:"에서",hint:"strolling in the park"},
+]},
+{id:"l1-19",level:1,title:"언제 (When)",billyGo:[44,64],exercises:[
+  {type:"translate",prompt:"When is your birthday?",answer:"생일이 언제예요?"},
+  {type:"translate",prompt:"When did you eat?",answer:"언제 먹었어요?"},
+  {type:"fillinblank",sentence:"____ 한국에 가요?",answer:"언제",hint:"When are you going to Korea?"},
+  {type:"wordbank",prompt:"Ask when class starts.",answer:"수업이 언제 시작해요",words:["수업이","언제","시작해요"]},
+]},
+{id:"l1-20",level:1,title:"Native Korean Numbers (하나, 둘, 셋…)",billyGo:[62,63],exercises:[
+  {type:"translate",prompt:"1, 2, 3 (native Korean)",answer:"하나, 둘, 셋"},
+  {type:"translate",prompt:"I am twenty years old.",answer:"스무 살이에요."},
+  {type:"fillinblank",sentence:"사과 ____ 개 주세요.",answer:"두",hint:"two (native, before a counter)"},
+  {type:"wordbank",prompt:"'I have one dog.'",answer:"개가 한 마리 있어요",words:["개가","한","마리","있어요"]},
+  {type:"fillinblank",sentence:"친구가 ____ 명 왔어요.",answer:"세",hint:"three people came"},
+]},
+{id:"l1-21",level:1,title:"Negation (안 / -지 않아요)",billyGo:[46],exercises:[
+  {type:"translate",prompt:"I don't eat meat.",answer:"저는 고기를 안 먹어요."},
+  {type:"translate",prompt:"I don't like coffee.",answer:"저는 커피를 좋아하지 않아요."},
+  {type:"fillinblank",sentence:"오늘은 학교에 ____ 가요.",answer:"안",hint:"don't go (pre-verb negation)"},
+  {type:"wordbank",prompt:"'I am not tired.'",answer:"피곤하지 않아요",words:["피곤하지","않아요"]},
+  {type:"fillinblank",sentence:"숙제를 ____ 했어요.",answer:"안",hint:"didn't do homework"},
+]},
+{id:"l1-22",level:1,title:"하다 Verbs",billyGo:[23],exercises:[
+  {type:"translate",prompt:"I study every day.",answer:"매일 공부해요."},
+  {type:"translate",prompt:"I exercise at the gym.",answer:"헬스장에서 운동해요."},
+  {type:"fillinblank",sentence:"주말에 쇼핑 ____.",answer:"해요",hint:"하다 → 해요"},
+  {type:"wordbank",prompt:"'I work at a company.'",answer:"회사에서 일해요",words:["회사에서","일해요"]},
+  {type:"fillinblank",sentence:"친구에게 전화 ____.",answer:"해요",hint:"make a phone call"},
+]},
+{id:"l1-23",level:1,title:"누구 (Who?)",billyGo:[44],exercises:[
+  {type:"translate",prompt:"Who is that person?",answer:"저분이 누구예요?"},
+  {type:"translate",prompt:"Who did you meet?",answer:"누구를 만났어요?"},
+  {type:"fillinblank",sentence:"____ 예요?",answer:"누구",hint:"Who is it?"},
+  {type:"wordbank",prompt:"Ask who your teacher is.",answer:"선생님이 누구예요",words:["선생님이","누구예요"]},
+]},
+{id:"l1-24",level:1,title:"왜 / 어떻게 (Why / How)",billyGo:[44,56],exercises:[
+  {type:"translate",prompt:"Why are you late?",answer:"왜 늦었어요?"},
+  {type:"translate",prompt:"How do you go to school?",answer:"학교에 어떻게 가요?"},
+  {type:"fillinblank",sentence:"____ 한국어를 공부해요?",answer:"왜",hint:"Why do you study Korean?"},
+  {type:"wordbank",prompt:"Ask how to say this in Korean.",answer:"이거 한국어로 어떻게 해요",words:["이거","한국어로","어떻게","해요"]},
+]},
+{id:"l1-25",level:1,title:"From A to B (-에서/부터 -까지)",billyGo:[48],exercises:[
+  {type:"translate",prompt:"I go from home to school.",answer:"집에서 학교까지 가요."},
+  {type:"translate",prompt:"From Monday to Friday.",answer:"월요일부터 금요일까지"},
+  {type:"fillinblank",sentence:"서울____ 부산까지 얼마나 걸려요?",answer:"에서",hint:"from Seoul"},
+  {type:"wordbank",prompt:"'From 9 o'clock to 6 o'clock.'",answer:"아홉 시부터 여섯 시까지",words:["아홉","시부터","여섯","시까지"]},
+]},
+// ════════════════════════ LEVEL 2 ════════════════════════
+{id:"l2-1",level:2,title:"Future Tense (-ㄹ/을 거예요)",billyGo:[43,47],exercises:[
+  {type:"translate",prompt:"I will eat dinner.",answer:"저녁을 먹을 거예요."},
+  {type:"translate",prompt:"Tomorrow I will study Korean.",answer:"내일 한국어를 공부할 거예요."},
+  {type:"fillinblank",sentence:"주말에 친구를 만날 ____.",answer:"거예요",hint:"going to meet"},
+  {type:"wordbank",prompt:"'It will rain tomorrow.'",answer:"내일 비가 올 거예요",words:["내일","비가","올","거예요"]},
+  {type:"fillinblank",sentence:"저는 의사가 ____ 거예요.",answer:"될",hint:"I will become (되다) a doctor"},
+]},
+{id:"l2-2",level:2,title:"Object Marker (-을 / -를)",billyGo:[16],exercises:[
+  {type:"translate",prompt:"I drink coffee.",answer:"커피를 마셔요."},
+  {type:"translate",prompt:"I study Korean.",answer:"한국어를 공부해요."},
+  {type:"fillinblank",sentence:"저는 음악____ 들어요.",answer:"을",hint:"음악 ends in consonant → -을"},
+  {type:"wordbank",prompt:"'I watch a film.'",answer:"영화를 봐요",words:["영화를","봐요"]},
+  {type:"fillinblank",sentence:"밥____ 먹었어요.",answer:"을",hint:"밥 ends in consonant → -을"},
+]},
+{id:"l2-3",level:2,title:"그리고 / 그래서 (And / So)",billyGo:[37,70,71],exercises:[
+  {type:"translate",prompt:"I like coffee. And I also like tea.",answer:"커피를 좋아해요. 그리고 차도 좋아해요."},
+  {type:"translate",prompt:"I was hungry, so I ate.",answer:"배고팠어요. 그래서 먹었어요."},
+  {type:"fillinblank",sentence:"비가 왔어요. ____ 집에 있었어요.",answer:"그래서",hint:"therefore stayed home"},
+  {type:"wordbank",prompt:"Connect: 'tired' + 'went home early'",answer:"피곤했어요 그래서 일찍 집에 갔어요",words:["피곤했어요","그래서","일찍","집에","갔어요"]},
+]},
+{id:"l2-4",level:2,title:"-하고 / -(이)랑 (And, With)",billyGo:[37,50],exercises:[
+  {type:"translate",prompt:"Coffee and tea",answer:"커피하고 차"},
+  {type:"translate",prompt:"I went with my friend.",answer:"친구랑 갔어요."},
+  {type:"fillinblank",sentence:"저는 친구____ 도서관에 가요.",answer:"랑",hint:"with (informal, after vowel)"},
+  {type:"wordbank",prompt:"'Apples and bananas'",answer:"사과하고 바나나",words:["사과하고","바나나"]},
+  {type:"fillinblank",sentence:"어머니____ 쇼핑을 했어요.",answer:"랑",hint:"with mum (랑 after vowel)"},
+]},
+{id:"l2-5",level:2,title:"Days of the Week (요일)",billyGo:[64],exercises:[
+  {type:"translate",prompt:"Today is Monday.",answer:"오늘은 월요일이에요."},
+  {type:"translate",prompt:"I have class on Wednesdays.",answer:"수요일에 수업이 있어요."},
+  {type:"fillinblank",sentence:"____ 에 친구를 만나요.",answer:"토요일",hint:"Saturday"},
+  {type:"wordbank",prompt:"'I rest on Sundays.'",answer:"일요일에 쉬어요",words:["일요일에","쉬어요"]},
+  {type:"fillinblank",sentence:"오늘이 ____ 이에요?",answer:"무슨 요일",hint:"What day is today?"},
+]},
+{id:"l2-6",level:2,title:"그렇지만 / 그런데 (But / However)",billyGo:[38],exercises:[
+  {type:"translate",prompt:"I like coffee. But I don't drink it at night.",answer:"커피를 좋아해요. 그렇지만 밤에는 안 마셔요."},
+  {type:"translate",prompt:"I wanted to go. But I was busy.",answer:"가고 싶었어요. 그런데 바빴어요."},
+  {type:"fillinblank",sentence:"음식이 맛있어요. ____ 너무 비싸요.",answer:"그런데",hint:"by the way / but"},
+  {type:"wordbank",prompt:"'I studied hard. But I failed.'",answer:"열심히 공부했어요 그렇지만 떨어졌어요",words:["열심히","공부했어요","그렇지만","떨어졌어요"]},
+]},
+{id:"l2-7",level:2,title:"한테 / 한테서 (To / From someone)",billyGo:[48],exercises:[
+  {type:"translate",prompt:"I gave a gift to my friend.",answer:"친구한테 선물을 줬어요."},
+  {type:"translate",prompt:"I received a message from my mum.",answer:"엄마한테서 메시지를 받았어요."},
+  {type:"fillinblank",sentence:"선생님____ 질문했어요.",answer:"한테",hint:"asked the teacher"},
+  {type:"wordbank",prompt:"'I heard (it) from my friend.'",answer:"친구한테서 들었어요",words:["친구한테서","들었어요"]},
+]},
+{id:"l2-8",level:2,title:"Telling the Time",billyGo:[64],exercises:[
+  {type:"translate",prompt:"It is 3 o'clock.",answer:"세 시예요."},
+  {type:"translate",prompt:"It is 10:30.",answer:"열 시 삼십 분이에요."},
+  {type:"fillinblank",sentence:"지금 몇 ____ 예요?",answer:"시",hint:"o'clock"},
+  {type:"wordbank",prompt:"'Class starts at 9 o'clock.'",answer:"수업이 아홉 시에 시작해요",words:["수업이","아홉","시에","시작해요"]},
+  {type:"fillinblank",sentence:"____ 시 반에 만나요.",answer:"두",hint:"Let's meet at 2:30 (half past two)"},
+]},
+{id:"l2-9",level:2,title:"Counters (개, 명…)",billyGo:[63],exercises:[
+  {type:"translate",prompt:"Two apples, please.",answer:"사과 두 개 주세요."},
+  {type:"translate",prompt:"There are three people.",answer:"세 명이에요."},
+  {type:"fillinblank",sentence:"학생이 몇 ____이에요?",answer:"명",hint:"person counter"},
+  {type:"wordbank",prompt:"'I have five books.'",answer:"책이 다섯 권 있어요",words:["책이","다섯","권","있어요"]},
+  {type:"fillinblank",sentence:"커피 두 ____ 주세요.",answer:"잔",hint:"cup counter for drinks"},
+]},
+{id:"l2-10",level:2,title:"Present Progressive (-고 있어요)",billyGo:[52],exercises:[
+  {type:"translate",prompt:"I am eating now.",answer:"지금 밥을 먹고 있어요."},
+  {type:"translate",prompt:"She is studying.",answer:"공부하고 있어요."},
+  {type:"fillinblank",sentence:"친구가 음악을 듣____ 있어요.",answer:"고",hint:"progressive"},
+  {type:"wordbank",prompt:"'I am watching TV.'",answer:"텔레비전을 보고 있어요",words:["텔레비전을","보고","있어요"]},
+  {type:"fillinblank",sentence:"비가 ____.",answer:"오고 있어요",hint:"It is raining (오다 progressive)"},
+]},
+{id:"l2-11",level:2,title:"Self-Introduction (자기소개)",billyGo:[11,35],exercises:[
+  {type:"translate",prompt:"My name is Minho.",answer:"제 이름은 민호예요."},
+  {type:"translate",prompt:"I am from the UK.",answer:"저는 영국에서 왔어요."},
+  {type:"fillinblank",sentence:"저는 회사원____ 회사에서 일해요.",answer:"이에요.",hint:"I am an office worker."},
+  {type:"wordbank",prompt:"Introduce: student + from Korea",answer:"저는 학생이에요 한국에서 왔어요",words:["저는","학생이에요","한국에서","왔어요"]},
+]},
+{id:"l2-12",level:2,title:"What is Today's Date? (날짜)",billyGo:[64],exercises:[
+  {type:"translate",prompt:"What is today's date?",answer:"오늘이 며칠이에요?"},
+  {type:"translate",prompt:"Today is August 5th.",answer:"오늘은 팔월 오 일이에요."},
+  {type:"fillinblank",sentence:"제 생일은 ____ 월 십이 일이에요.",answer:"삼",hint:"March"},
+  {type:"wordbank",prompt:"'My birthday is January 1st.'",answer:"제 생일은 일월 일 일이에요",words:["제","생일은","일월","일","일이에요"]},
+]},
+{id:"l2-13",level:2,title:"-도 (Too, Also) — Part 1 & 2",billyGo:[19],exercises:[
+  {type:"translate",prompt:"I like this too.",answer:"이것도 좋아요."},
+  {type:"translate",prompt:"I can speak English too.",answer:"영어도 할 수 있어요."},
+  {type:"fillinblank",sentence:"저는 커피를 좋아해요. 차____ 좋아해요.",answer:"도",hint:"also"},
+  {type:"wordbank",prompt:"'Me too.'",answer:"저도요",words:["저도요"]},
+  {type:"fillinblank",sentence:"오늘____ 날씨가 좋아요.",answer:"도",hint:"today also"},
+]},
+{id:"l2-15",level:2,title:"-만 (Only)",billyGo:[28],exercises:[
+  {type:"translate",prompt:"I only drink water.",answer:"물만 마셔요."},
+  {type:"translate",prompt:"I have only one friend here.",answer:"여기 친구가 한 명만 있어요."},
+  {type:"fillinblank",sentence:"저는 한국어____ 공부해요.",answer:"만",hint:"only Korean"},
+  {type:"wordbank",prompt:"'I only eat vegetables.'",answer:"야채만 먹어요",words:["야채만","먹어요"]},
+]},
+{id:"l2-16",level:2,title:"아주 / 조금 / 별로 / 전혀…",billyGo:[24],exercises:[
+  {type:"translate",prompt:"Korean is very fun.",answer:"한국어가 아주 재미있어요."},
+  {type:"translate",prompt:"I'm a little tired.",answer:"조금 피곤해요."},
+  {type:"fillinblank",sentence:"이 음식은 ____ 맛없어요.",answer:"별로",hint:"not really (negative context)"},
+  {type:"wordbank",prompt:"'I don't like it at all.'",answer:"전혀 좋아하지 않아요",words:["전혀","좋아하지","않아요"]},
+  {type:"fillinblank",sentence:"저는 ____ 배가 고파요.",answer:"진짜",hint:"really hungry"},
+]},
+{id:"l2-17",level:2,title:"Can / Cannot (-ㄹ 수 있다 / 없다)",billyGo:[29,81],exercises:[
+  {type:"translate",prompt:"I can speak Korean.",answer:"한국어를 할 수 있어요."},
+  {type:"translate",prompt:"I can't swim.",answer:"수영을 할 수 없어요."},
+  {type:"fillinblank",sentence:"저는 운전을 ____ 수 있어요.",answer:"할",hint:"can drive (하다 → 할)"},
+  {type:"wordbank",prompt:"'Can you eat spicy food?'",answer:"매운 음식을 먹을 수 있어요",words:["매운","음식을","먹을","수","있어요"]},
+  {type:"fillinblank",sentence:"지금 말할 수 ____.",answer:"없어요",hint:"can't speak now"},
+]},
+{id:"l2-18",level:2,title:"잘하다 / 못하다 (Good at / Bad at)",billyGo:[29,21],exercises:[
+  {type:"translate",prompt:"I am good at Korean.",answer:"한국어를 잘해요."},
+  {type:"translate",prompt:"I am not good at cooking.",answer:"요리를 못해요."},
+  {type:"fillinblank",sentence:"저는 노래를 ____해요.",answer:"못",hint:"can't do well"},
+  {type:"wordbank",prompt:"'My friend is good at English.'",answer:"친구가 영어를 잘해요",words:["친구가","영어를","잘해요"]},
+]},
+{id:"l2-19",level:2,title:"-는 것 (Making Verbs into Nouns)",billyGo:[57,69],exercises:[
+  {type:"translate",prompt:"I like reading.",answer:"책 읽는 것을 좋아해요."},
+  {type:"translate",prompt:"Studying Korean is fun.",answer:"한국어를 공부하는 것이 재미있어요."},
+  {type:"fillinblank",sentence:"음악을 듣____ 것을 좋아해요.",answer:"는",hint:"listening (verb nominaliser)"},
+  {type:"wordbank",prompt:"'Running every day is hard.'",answer:"매일 뛰는 것이 힘들어요",words:["매일","뛰는","것이","힘들어요"]},
+]},
+{id:"l2-20",level:2,title:"Have to / Must (-아/어야 해요)",billyGo:[91],exercises:[
+  {type:"translate",prompt:"I have to study.",answer:"공부해야 해요."},
+  {type:"translate",prompt:"You have to eat breakfast.",answer:"아침을 먹어야 해요."},
+  {type:"fillinblank",sentence:"오늘 일찍 ____ 해요.",answer:"자야",hint:"must sleep early (자다)"},
+  {type:"wordbank",prompt:"'I have to go now.'",answer:"지금 가야 해요",words:["지금","가야","해요"]},
+  {type:"fillinblank",sentence:"숙제를 ____야 해요.",answer:"해",hint:"must do homework (하다)"},
+]},
+{id:"l2-21",level:2,title:"More Than… (-보다 더)",billyGo:[55],exercises:[
+  {type:"translate",prompt:"Korean is more fun than English.",answer:"한국어가 영어보다 더 재미있어요."},
+  {type:"translate",prompt:"This is more expensive than that.",answer:"이게 그것보다 더 비싸요."},
+  {type:"fillinblank",sentence:"오늘이 어제____ 더 추워요.",answer:"보다",hint:"colder than yesterday"},
+  {type:"wordbank",prompt:"'I am taller than my friend.'",answer:"저는 친구보다 더 키가 커요",words:["저는","친구보다","더","키가","커요"]},
+]},
+{id:"l2-22",level:2,title:"좋다 vs 좋아하다",billyGo:[21],exercises:[
+  {type:"translate",prompt:"This weather is good. (adjective)",answer:"날씨가 좋아요."},
+  {type:"translate",prompt:"I like this weather. (verb)",answer:"이 날씨를 좋아해요."},
+  {type:"fillinblank",sentence:"이 노래가 ____.",answer:"좋아요",hint:"This song is good (adjective — no object marker)"},
+  {type:"wordbank",prompt:"'I like this song.' (verb form)",answer:"이 노래를 좋아해요",words:["이","노래를","좋아해요"]},
+  {type:"fillinblank",sentence:"한국 음식을 ____.",answer:"좋아해요",hint:"I like (verb, with 을/를)"},
+]},
+{id:"l2-23",level:2,title:"If / In case (-(으)면)",billyGo:[73],exercises:[
+  {type:"translate",prompt:"If you are tired, rest.",answer:"피곤하면 쉬세요."},
+  {type:"translate",prompt:"If I have money, I will travel.",answer:"돈이 있으면 여행할 거예요."},
+  {type:"fillinblank",sentence:"시간이 ____면 같이 가요.",answer:"있으",hint:"if (있다) — ends in vowel, add -면"},
+  {type:"wordbank",prompt:"'If it rains, I will stay home.'",answer:"비가 오면 집에 있을 거예요",words:["비가","오면","집에","있을","거예요"]},
+  {type:"fillinblank",sentence:"배고____먹어요.",answer:"프면",hint:"if hungry (배고프다 → 배고프면)"},
+]},
+{id:"l2-24",level:2,title:"아직 / 벌써 (Still / Already)",billyGo:[24],exercises:[
+  {type:"translate",prompt:"I still haven't eaten.",answer:"아직 밥을 안 먹었어요."},
+  {type:"translate",prompt:"I have already finished.",answer:"벌써 끝났어요."},
+  {type:"fillinblank",sentence:"____ 집에 왔어요? 빠르네요!",answer:"벌써",hint:"already home"},
+  {type:"wordbank",prompt:"'I still don't know.'",answer:"아직 몰라요",words:["아직","몰라요"]},
+]},
+{id:"l2-25",level:2,title:"누군가 / 무언가 / 어딘가 / 언젠가",billyGo:[],exercises:[
+  {type:"translate",prompt:"Someone is at the door.",answer:"누군가 문 앞에 있어요."},
+  {type:"translate",prompt:"I want to go somewhere.",answer:"어딘가 가고 싶어요."},
+  {type:"fillinblank",sentence:"____ 특별한 날 다시 만나요.",answer:"언젠가",hint:"someday"},
+  {type:"wordbank",prompt:"'There is something on the table.'",answer:"테이블 위에 무언가 있어요",words:["테이블","위에","무언가","있어요"]},
+]},
+{id:"l2-26",level:2,title:"Imperative (-(으)세요)",billyGo:[51,79],exercises:[
+  {type:"translate",prompt:"Please sit down.",answer:"앉으세요."},
+  {type:"translate",prompt:"Please speak slowly.",answer:"천천히 말씀하세요."},
+  {type:"fillinblank",sentence:"여기 ____ 세요.",answer:"앉으",hint:"Sit (앉다) + -(으)세요"},
+  {type:"wordbank",prompt:"'Please wait here.'",answer:"여기서 기다리세요",words:["여기서","기다리세요"]},
+]},
+{id:"l2-27",level:2,title:"Please Do It For Me (-아/어 주세요)",billyGo:[32,33],exercises:[
+  {type:"translate",prompt:"Please open the door.",answer:"문 열어 주세요."},
+  {type:"translate",prompt:"Please explain slowly.",answer:"천천히 설명해 주세요."},
+  {type:"fillinblank",sentence:"사진을 찍어 ____.",answer:"주세요",hint:"please take a photo for me"},
+  {type:"wordbank",prompt:"'Please help me.'",answer:"도와 주세요",words:["도와","주세요"]},
+  {type:"fillinblank",sentence:"이거 좀 들어 ____.",answer:"주세요",hint:"please carry this for me"},
+]},
+{id:"l2-28",level:2,title:"-(으)로 (Direction / Method)",billyGo:[67,68],exercises:[
+  {type:"translate",prompt:"Go straight ahead.",answer:"앞으로 가세요."},
+  {type:"translate",prompt:"I go to work by bus.",answer:"버스로 출근해요."},
+  {type:"fillinblank",sentence:"왼쪽____ 돌아가세요.",answer:"으로",hint:"turn left (방향)"},
+  {type:"wordbank",prompt:"'I go by subway.'",answer:"지하철로 가요",words:["지하철로","가요"]},
+  {type:"fillinblank",sentence:"젓가락____ 먹어요.",answer:"으로",hint:"eat with chopsticks (도구)"},
+]},
+{id:"l2-29",level:2,title:"더 / 다 (More / All)",billyGo:[55,57],exercises:[
+  {type:"translate",prompt:"Please give me a little more.",answer:"조금 더 주세요."},
+  {type:"translate",prompt:"I ate everything.",answer:"다 먹었어요."},
+  {type:"fillinblank",sentence:"숙제를 ____ 했어요.",answer:"다",hint:"finished all of it"},
+  {type:"wordbank",prompt:"'I want more coffee.'",answer:"커피 더 마시고 싶어요",words:["커피","더","마시고","싶어요"]},
+]},
+{id:"l2-30",level:2,title:"Don't Do It (-지 마세요)",billyGo:[78],exercises:[
+  {type:"translate",prompt:"Don't run here.",answer:"여기서 뛰지 마세요."},
+  {type:"translate",prompt:"Please don't be late.",answer:"늦지 마세요."},
+  {type:"fillinblank",sentence:"이거 먹지 ____.",answer:"마세요",hint:"don't eat this"},
+  {type:"wordbank",prompt:"'Don't worry.'",answer:"걱정하지 마세요",words:["걱정하지","마세요"]},
+  {type:"fillinblank",sentence:"큰 소리로 말하지 ____.",answer:"마세요",hint:"don't speak loudly"},
+]},
+];
+
+// ── App state ─────────────────────────────────────────────
+let activeLessonId = null;
+let exIdx = 0;
+let sessionCorrect = 0;
+let sessionTotal = 0;
+let awaitingNext = false;
+let lastCorrectAnswer = "";
+let lessonWrong = [];
+
+// ── Progress storage ──────────────────────────────────────
+function loadProgress(lid){ try{return JSON.parse(localStorage.getItem("kp_"+lid))||{c:0,t:0};}catch{return{c:0,t:0};}}
+function saveProgress(lid,c,t){ try{localStorage.setItem("kp_"+lid,JSON.stringify({c,t}));}catch{}}
+function isComplete(lid){ const p=loadProgress(lid); return p.t>0 && p.c/p.t>=0.8; }
+
+const MKEY='topik_mistakes';
+function loadMistakes(){ try{return JSON.parse(localStorage.getItem(MKEY))||[];}catch{return[];} }
+function saveMistakes(arr){ try{localStorage.setItem(MKEY,JSON.stringify(arr));}catch{} }
+function appendMistakes(items,lid){
+  if(!items.length) return;
+  const lesson=LESSONS.find(l=>l.id===lid);
+  const date=new Date().toLocaleDateString();
+  const arr=loadMistakes();
+  items.forEach(m=>arr.push({lid,title:lesson?lesson.title:lid,prompt:m.prompt,correct:m.correct,yours:m.yours,type:m.type,hint:m.hint,date}));
+  saveMistakes(arr);
+  renderMistakeBadge();
+}
+function renderMistakeBadge(){
+  const b=document.querySelector('#review-nav-btn .mbadge');
+  const n=loadMistakes().length;
+  if(b) b.textContent=n||'';
+}
+
+// ── Sidebar ───────────────────────────────────────────────
+function buildSidebar(){
+  const nav=document.getElementById("sidebar");
+  nav.innerHTML="";
+  const vg=document.createElement('div'); vg.className='level-group';
+  const vh=document.createElement('div'); vh.className='level-header'; vh.textContent='Vocabulary';
+  const vb=document.createElement('button'); vb.id='vocab-nav-btn'; vb.className='lesson-btn';
+  vb.innerHTML='<span style="flex:1">📚 TOPIK I Words (1,671)</span><span class="vbadge"></span>';
+  vb.addEventListener('click',()=>window.startVocab&&window.startVocab());
+  const rb=document.createElement('button'); rb.id='review-nav-btn'; rb.className='lesson-btn';
+  rb.innerHTML='<span style="flex:1">📝 Mistakes Log</span><span class="mbadge"></span>';
+  rb.addEventListener('click',()=>window.showReview&&window.showReview());
+  vg.append(vh,vb,rb); nav.appendChild(vg);
+  const vsep=document.createElement('div'); vsep.style.cssText='border-top:1px solid var(--border);margin:4px 0';
+  nav.appendChild(vsep);
+  if(typeof window.updateVStats==='function') window.updateVStats();
+  const levels={1:[],2:[]};
+  LESSONS.forEach(l=>levels[l.level].push(l));
+  [1,2].forEach(lv=>{
+    const grp=document.createElement("div"); grp.className="level-group";
+    const hdr=document.createElement("div"); hdr.className="level-header";
+    hdr.textContent="Level "+lv+" — TTMIK Core Grammar";
+    grp.appendChild(hdr);
+    levels[lv].forEach(l=>{
+      const btn=document.createElement("button");
+      btn.dataset.id=l.id;
+      const done=isComplete(l.id);
+      btn.className='lesson-btn'+(done?' done':'');
+      btn.innerHTML=`<span style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${l.title}</span>`+
+        `<span class="check${done?" show":""}">✓</span>`;
+      btn.addEventListener("click",()=>startLesson(l.id));
+      grp.appendChild(btn);
+    });
+    nav.appendChild(grp);
+  });
+}
+
+// ── Start a lesson ────────────────────────────────────────
+function startLesson(lid){
+  activeLessonId=lid;
+  exIdx=0;
+  awaitingNext=false;
+  lessonWrong=[];
+  document.getElementById('vocab-wrap').style.display='none';
+  document.getElementById('exercise-wrap').style.display='block';
+  document.getElementById('review-wrap').style.display='none';
+  // mark sidebar
+  document.querySelectorAll(".lesson-btn").forEach(b=>b.classList.toggle("active",b.dataset.id===lid));
+  const lesson=LESSONS.find(l=>l.id===lid);
+  // show header
+  const hdr=document.getElementById("lesson-header");
+  hdr.style.display="block";
+  document.getElementById("lesson-title").textContent=lesson.title;
+  document.getElementById("lesson-level-tag").textContent="TTMIK Level "+lesson.level;
+  const bgTag=document.getElementById("lesson-bg-ref");
+  bgTag.textContent='';
+  // hide empty
+  document.getElementById("empty").style.display="none";
+  document.getElementById("all-done").style.display="none";
+  document.getElementById("ex-card").style.display="block";
+  document.getElementById("prog-bar-wrap").style.display="block";
+  document.getElementById("actions").style.display="flex";
+  showExercise();
+}
+
+// ── Render exercise ───────────────────────────────────────
+function showExercise(){
+  const lesson=LESSONS.find(l=>l.id===activeLessonId);
+  const ex=lesson.exercises[exIdx];
+  awaitingNext=false;
+  if(window.KorKB) window.KorKB.reset();
+
+  // progress bar
+  const pct=Math.round(exIdx/lesson.exercises.length*100);
+  document.getElementById("prog-bar").style.width=pct+"%";
+
+  // reset feedback / self-mark
+  const fb=document.getElementById("feedback");
+  fb.style.display="none"; fb.className="";
+  document.getElementById("self-mark").style.display="none";
+  document.getElementById("btn-next").style.display="none";
+  document.getElementById("btn-audio").style.display="none";
+
+  // badge
+  const badge=document.getElementById("ex-type-badge");
+  const labels={translate:"Translate",wordbank:"Word Bank",fillinblank:"Fill in the Blank"};
+  const badgeClass={translate:"badge-translate",wordbank:"badge-wordbank",fillinblank:"badge-fillinblank"};
+  badge.textContent=labels[ex.type];
+  badge.className="badge-"+ex.type; // uses CSS class
+
+  // hide all input areas
+  ["translate-area","wordbank-area","fib-area"].forEach(id=>document.getElementById(id).style.display="none");
+
+  if(ex.type==="translate"){
+    document.getElementById("ex-prompt").textContent=ex.prompt;
+    document.getElementById("translate-area").style.display="block";
+    const ta=document.getElementById("translate-input");
+    ta.value="";
+    document.getElementById("btn-check").style.display="inline-block";
+    document.getElementById("btn-check").disabled=false;
+    document.getElementById("btn-check").textContent="Check";
+    setTimeout(()=>ta.focus(),50);
+
+  }else if(ex.type==="wordbank"){
+    document.getElementById("ex-prompt").textContent="Build: "+ex.prompt;
+    document.getElementById("wordbank-area").style.display="block";
+    renderWordBank(ex);
+    document.getElementById("btn-check").style.display="inline-block";
+    document.getElementById("btn-check").disabled=false;
+    document.getElementById("btn-check").textContent="Check";
+
+  }else if(ex.type==="fillinblank"){
+    document.getElementById("ex-prompt").textContent="Fill in the blank:";
+    document.getElementById("fib-area").style.display="block";
+    const parts=ex.sentence.split("____");
+    const sentDiv=document.getElementById("fib-sentence");
+    sentDiv.innerHTML=parts[0]+'<span class="blank-slot" id="blank-display">____</span>'+(parts[1]||"");
+    document.getElementById("fib-hint").textContent="Hint: "+ex.hint;
+    const inp=document.getElementById("fib-input");
+    inp.value="";
+    document.getElementById("btn-check").style.display="inline-block";
+    document.getElementById("btn-check").disabled=false;
+    document.getElementById("btn-check").textContent="Check";
+    setTimeout(()=>inp.focus(),50);
+  }
+}
+
+// ── Word bank helpers ─────────────────────────────────────
+let wbBuilt=[];
+function renderWordBank(ex){
+  wbBuilt=[];
+  const shuffled=[...ex.words].sort(()=>Math.random()-.5);
+  const tilesDiv=document.getElementById("wb-tiles");
+  const builtDiv=document.getElementById("wb-built");
+  tilesDiv.innerHTML=""; builtDiv.innerHTML="";
+  shuffled.forEach(w=>{
+    const t=document.createElement("span"); t.className="wb-tile"; t.textContent=w;
+    t.addEventListener("click",()=>{
+      if(awaitingNext) return;
+      wbBuilt.push(w);
+      t.remove();
+      addBuiltTile(w);
+    });
+    tilesDiv.appendChild(t);
+  });
+}
+function addBuiltTile(word){
+  const builtDiv=document.getElementById("wb-built");
+  const t=document.createElement("span"); t.className="wb-tile built"; t.textContent=word;
+  t.addEventListener("click",()=>{
+    if(awaitingNext) return;
+    wbBuilt=wbBuilt.filter((_,i)=>i!==wbBuilt.lastIndexOf(word)||false);
+    // remove last occurrence
+    const idx=wbBuilt.lastIndexOf(word);
+    wbBuilt.splice(idx,1);
+    t.remove();
+    // put back in tiles
+    const tilesDiv=document.getElementById("wb-tiles");
+    const rt=document.createElement("span"); rt.className="wb-tile"; rt.textContent=word;
+    rt.addEventListener("click",()=>{
+      if(awaitingNext) return;
+      wbBuilt.push(word);
+      rt.remove();
+      addBuiltTile(word);
+    });
+    tilesDiv.appendChild(rt);
+  });
+  builtDiv.appendChild(t);
+}
+
+// ── Check answer ──────────────────────────────────────────
+function checkAnswer(){
+  const lesson=LESSONS.find(l=>l.id===activeLessonId);
+  const ex=lesson.exercises[exIdx];
+  awaitingNext=true;
+  document.getElementById("btn-check").style.display="none";
+  document.getElementById("btn-next").style.display="inline-block";
+  document.getElementById("btn-audio").style.display="inline-block";
+
+  if(ex.type==="translate"){
+    const val=document.getElementById('translate-input').value.trim();
+    const norm=s=>s.replace(/[\s,\.!?~·]/g,'');
+    const correct=norm(val)===norm(ex.answer);
+    lastCorrectAnswer=ex.answer;
+    const fb=document.getElementById("feedback");
+    fb.style.display="block";
+    if(correct){
+      fb.className="correct";
+      fb.textContent="✓ Correct!";
+    }else{
+      fb.className="incorrect";
+      fb.innerHTML="✗  Correct: <strong>"+escHtml(ex.answer)+"</strong>";
+      lessonWrong.push({type:'translate',prompt:ex.prompt,correct:ex.answer,yours:val||'(blank)'});
+    }
+    recordResult(correct);
+
+  }else if(ex.type==="wordbank"){
+    const built=wbBuilt.join(" ");
+    // ignore spaces and punctuation when comparing tiles to expected answer
+    const normWB=s=>s.replace(/[\s,\.!?~·]/g,'');
+    const correct=normWB(built)===normWB(ex.answer);
+    lastCorrectAnswer=ex.answer;
+    const fb=document.getElementById("feedback");
+    fb.style.display="block";
+    if(correct){
+      fb.className="correct";
+      fb.textContent="✓ Correct!";
+    }else{
+      fb.className="incorrect";
+      fb.innerHTML="✗  Correct answer: <strong>"+escHtml(ex.answer)+"</strong>";
+      lessonWrong.push({type:'wordbank',prompt:ex.prompt,correct:ex.answer,yours:wbBuilt.join(' ')||'(none)'});
+    }
+    recordResult(correct);
+
+  }else if(ex.type==="fillinblank"){
+    const val=document.getElementById("fib-input").value.trim();
+    const correct=val===ex.answer;
+    lastCorrectAnswer=ex.sentence.replace('____',ex.answer);
+    document.getElementById("blank-display").textContent=ex.answer;
+    const fb=document.getElementById("feedback");
+    fb.style.display="block";
+    if(correct){
+      fb.className="correct";
+      fb.textContent="✓ Correct!";
+    }else{
+      fb.className="incorrect";
+      fb.innerHTML='✗  Correct: <strong>'+escHtml(ex.sentence.replace('____',ex.answer))+"</strong>";
+      lessonWrong.push({type:'fillinblank',hint:ex.hint,prompt:ex.sentence,correct:ex.sentence.replace('____',ex.answer),yours:val||'(blank)'});
+    }
+    recordResult(correct);
+  }
+}
+
+function recordResult(correct){
+  sessionTotal++;
+  if(correct) sessionCorrect++;
+  document.getElementById("sc-correct").textContent=sessionCorrect;
+  document.getElementById("sc-total").textContent=sessionTotal;
+}
+
+// ── Self-mark buttons (translate) ─────────────────────────
+document.getElementById("btn-correct").addEventListener("click",()=>{recordResult(true);finishSelfMark();});
+document.getElementById("btn-incorrect").addEventListener("click",()=>{
+  const _ex=LESSONS.find(l=>l.id===activeLessonId).exercises[exIdx];
+  lessonWrong.push({prompt:_ex.prompt,correct:_ex.answer,yours:document.getElementById('translate-input').value.trim()||'(no answer)'});
+  recordResult(false);finishSelfMark();
+});
+function finishSelfMark(){
+  document.getElementById("self-mark").style.display="none";
+}
+
+// ── Next exercise ─────────────────────────────────────────
+function nextExercise(){
+  const lesson=LESSONS.find(l=>l.id===activeLessonId);
+  exIdx++;
+  if(exIdx>=lesson.exercises.length){
+    // lesson done
+    const total=lesson.exercises.length;
+    const correct=total-lessonWrong.length;
+    saveProgress(activeLessonId, correct, total);
+    appendMistakes(lessonWrong, activeLessonId);
+    buildSidebar(); // refresh ✓ marks
+    document.querySelectorAll(".lesson-btn").forEach(b=>b.classList.toggle("active",b.dataset.id===activeLessonId));
+    document.getElementById("ex-card").style.display="none";
+    document.getElementById("prog-bar-wrap").style.display="none";
+    document.getElementById("actions").style.display="none";
+    document.getElementById("all-done").style.display="block";
+    document.getElementById("prog-bar").style.width="100%";
+    document.getElementById("done-score").textContent=`Session score so far: ${sessionCorrect} / ${sessionTotal}`;
+    const mDiv=document.getElementById('done-mistakes');
+    if(lessonWrong.length){
+      mDiv.innerHTML='<h3>'+lessonWrong.length+' missed</h3>';
+      lessonWrong.forEach(m=>{
+        mDiv.innerHTML+=`<div class="miss-item"><div class="miss-prompt">${escHtml(m.prompt)}</div><span class="miss-yours">${escHtml(m.yours)}</span><span class="miss-correct">${escHtml(m.correct)}</span></div>`;
+      });
+    }else{
+      mDiv.innerHTML='<p style="color:var(--green);font-size:14px;margin-top:8px;margin-bottom:0">Perfect score! No mistakes.</p>';
+    }
+  }else{
+    showExercise();
+  }
+}
+
+// ── Audio ─────────────────────────────────────────────────
+function speakKorean(text){
+  if(!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const utt=new SpeechSynthesisUtterance(text);
+  utt.lang="ko-KR";
+  utt.rate=0.9;
+  window.speechSynthesis.speak(utt);
+}
+
+// ── Button wiring ─────────────────────────────────────────
+document.getElementById("btn-check").addEventListener("click",checkAnswer);
+document.getElementById("btn-next").addEventListener("click",nextExercise);
+document.getElementById("btn-audio").addEventListener("click",()=>speakKorean(lastCorrectAnswer));
+document.getElementById("btn-restart").addEventListener("click",()=>startLesson(activeLessonId));
+
+// Enter key to check / advance
+document.addEventListener("keydown",e=>{
+  if(e.key!=="Enter") return;
+  const check=document.getElementById("btn-check");
+  const next=document.getElementById("btn-next");
+  if(!awaitingNext && check.style.display!=="none" && !check.disabled){ checkAnswer(); }
+  else if(awaitingNext && next.style.display!=="none"){ nextExercise(); }
+});
+
+// ── Helpers ───────────────────────────────────────────────
+function escHtml(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+// ── Init ──────────────────────────────────────────────────
+buildSidebar();
+
+// ── Vocabulary SRS ────────────────────────────────────
+(function(){
+  if(typeof VOCAB==='undefined') return;
+  const DAY=86400000, SKEY='topik_srs';
+  let vcData={},vcQueue=[],vcIdx=0,vcFlipped=false,vcDir='both',vcKrWord='',vcCurrentDir='en-kr';
+  const SKEY_SET='topik_settings';
+  let vcSettings=(()=>{try{return JSON.parse(localStorage.getItem(SKEY_SET))||{};}catch{return{};}})();
+  let vcNewPerDay=vcSettings.newPerDay||20;
+  let vcMaxReviews=vcSettings.maxReviews||0;
+
+  function vLoad(){ try{return JSON.parse(localStorage.getItem(SKEY))||{};}catch{return{};} }
+  function vSave(){ try{localStorage.setItem(SKEY,JSON.stringify(vcData));}catch{} }
+  function vCard(i){ return vcData[i]||{d:0,i:0,e:2.5,r:0}; }
+
+  function fmtIvl(d){
+    if(!d||d<1) return '<1d';
+    if(d<30) return d+'d';
+    if(d<365) return Math.round(d/30)+'mo';
+    return +(d/365).toFixed(1)+'y';
+  }
+
+  function vNextIvls(c){
+    if(!c.r) return ['1m','5m','1d','4d'];
+    return [
+      fmtIvl(Math.max(1,Math.round(c.i*.5))),
+      fmtIvl(Math.max(1,Math.round(c.i*1.2))),
+      fmtIvl(Math.max(1,Math.round(c.i*c.e))),
+      fmtIvl(Math.max(1,Math.round(c.i*c.e*1.3))),
+    ];
+  }
+
+  function vSchedule(c,rating){
+    const now=Date.now();
+    if(!c.r){
+      if(rating===1) c.d=now+60000;
+      else if(rating===2) c.d=now+5*60000;
+      else if(rating===3){ c.i=1;c.r=1;c.d=now+DAY; }
+      else { c.i=4;c.r=1;c.e=Math.min(3.5,c.e+.15);c.d=now+4*DAY; }
+    } else {
+      if(rating===1){
+        c.e=Math.max(1.3,c.e-.2); c.i=Math.max(1,Math.round(c.i*.5)); c.d=now+10*60000;
+      } else if(rating===2){
+        c.e=Math.max(1.3,c.e-.15); c.i=Math.max(1,Math.round(c.i*1.2)); c.d=now+c.i*DAY;
+      } else if(rating===3){
+        c.i=Math.max(1,Math.round(c.i*c.e)); c.r++; c.d=now+c.i*DAY;
+      } else {
+        c.i=Math.max(1,Math.round(c.i*c.e*1.3)); c.e=Math.min(3.5,c.e+.15); c.r++; c.d=now+c.i*DAY;
+      }
+    }
+  }
+
+  function buildQueue(){
+    vcData=vLoad();
+    const now=Date.now(),due=[],newC=[];
+    VOCAB.forEach((_,i)=>{
+      const c=vCard(i);
+      if(c.r>0||(c.r===0&&c.d>0)){ if(c.d<=now) due.push(i); }
+      else newC.push(i);
+    });
+    due.sort(()=>Math.random()-.5);
+    newC.sort(()=>Math.random()-.5);
+    const dueSlice=vcMaxReviews>0?due.slice(0,vcMaxReviews):due;
+    vcQueue=[...dueSlice,...newC.slice(0,vcNewPerDay)];
+    vcIdx=0;
+  }
+
+  window.updateVStats=function(){
+    const data=vLoad(),now=Date.now();
+    let due=0,newC=0;
+    VOCAB.forEach((_,i)=>{
+      const c=data[i]||{d:0,r:0};
+      if(!c.r&&!c.d) newC++;
+      else if(c.d<=now) due++;
+    });
+    const dEl=document.getElementById('vs-due');
+    const nEl=document.getElementById('vs-new');
+    if(dEl) dEl.textContent=due;
+    if(nEl) nEl.textContent=newC;
+    const badge=document.querySelector('#vocab-nav-btn .vbadge');
+    if(badge) badge.textContent=due>0?due:(newC>0?'★':'✓');
+  };
+
+  function showVCard(){
+    const el=id=>document.getElementById(id);
+    if(vcIdx>=vcQueue.length){
+      el('vc-flash').style.display='none';
+      el('vc-flip-row').style.display='none';
+      el('vc-rate-row').style.display='none';
+      el('vc-done').style.display='block';
+      el('vc-done-msg').textContent='Reviewed '+vcQueue.length+' card'+(vcQueue.length!==1?'s':'')+' this session.';
+      window.updateVStats();
+      return;
+    }
+    el('vc-done').style.display='none';
+    el('vc-flash').style.display='block';
+    el('vc-flip-row').style.display='flex';
+    el('vc-rate-row').style.display='none';
+
+    const wi=vcQueue[vcIdx],word=VOCAB[wi],c=vCard(wi);
+    const isNew=!c.r&&!c.d;
+    let dir=vcDir==='both'?(Math.random()<.5?'en-kr':'kr-en'):vcDir;
+    vcKrWord=word.kr;
+    vcFlipped=false;
+    vcCurrentDir=dir;
+
+    el('vc-tag').textContent=dir==='en-kr'?'English → Korean':'Korean → English';
+    el('vc-new-badge').style.display=isNew?'block':'none';
+    el('btn-vcflip').style.display='';;
+    el('btn-vcflip').textContent='Flip ↓';
+
+    const qEl=el('vc-q'),aEl=el('vc-ans');
+    if(dir==='en-kr'){ qEl.textContent=word.en; qEl.className=''; aEl.textContent=word.kr; aEl.className=''; }
+    else { qEl.textContent=word.kr; qEl.className='kr'; aEl.textContent=word.en; aEl.className='en'; }
+
+    const ivls=vNextIvls(c);
+    ['again','hard','good','easy'].forEach((k,i)=>{ el('vi-'+k).textContent=ivls[i]; });
+  }
+
+  function flipCard(){
+    vcFlipped=!vcFlipped;
+    document.getElementById('vc-flash').classList.toggle('flip',vcFlipped);
+    document.getElementById('btn-vcflip').textContent=vcFlipped?'\u21ba Flip back':'Flip \u2193';
+    if(vcFlipped){
+      document.getElementById('vc-rate-row').style.display='flex';
+    }
+  }
+
+  function rateCard(rating){
+    const wi=vcQueue[vcIdx];
+    const c=Object.assign({},vCard(wi));
+    vSchedule(c,rating); vcData[wi]=c; vSave();
+    vcIdx++; showVCard();
+  }
+
+  window.startVocab=function(){
+    const el=id=>document.getElementById(id);
+    el('exercise-wrap').style.display='none';
+    el('vocab-wrap').style.display='block';
+    activeLessonId=null;
+    document.querySelectorAll('.lesson-btn').forEach(b=>b.classList.remove('active'));
+    el('vocab-nav-btn').classList.add('active');
+    buildQueue(); window.updateVStats(); showVCard();
+  };
+
+  document.getElementById('vc-dir-row').addEventListener('click',e=>{
+    const b=e.target.closest('.vd-btn'); if(!b) return;
+    document.querySelectorAll('.vd-btn').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active'); vcDir=b.dataset.dir;
+  });
+  document.getElementById('vc-inner').addEventListener('click',()=>{ flipCard(); });
+  document.getElementById('btn-vcflip').addEventListener('click',flipCard);
+  document.getElementById('btn-vcaudio').addEventListener('click',()=>speakKorean(vcKrWord));
+  document.getElementById('vcr-again').addEventListener('click',()=>rateCard(1));
+  document.getElementById('vcr-hard').addEventListener('click',()=>rateCard(2));
+  document.getElementById('vcr-good').addEventListener('click',()=>rateCard(3));
+  document.getElementById('vcr-easy').addEventListener('click',()=>rateCard(4));
+  document.getElementById('btn-vc-restart').addEventListener('click',window.startVocab);
+
+  // settings panel
+  const setNew=document.getElementById('set-new-per-day');
+  const setRev=document.getElementById('set-max-reviews');
+  setNew.value=vcNewPerDay;
+  setRev.value=vcMaxReviews||'';
+  function saveSetting(){ vcSettings.newPerDay=vcNewPerDay; vcSettings.maxReviews=vcMaxReviews; try{localStorage.setItem(SKEY_SET,JSON.stringify(vcSettings));}catch{} }
+  setNew.addEventListener('change',()=>{ vcNewPerDay=Math.max(1,+setNew.value||20); saveSetting(); });
+  setRev.addEventListener('change',()=>{ vcMaxReviews=Math.max(0,+setRev.value||0); saveSetting(); });
+  document.getElementById('btn-vc-reset').addEventListener('click',()=>{
+    if(!confirm('Reset all SRS progress? This cannot be undone.')) return;
+    localStorage.removeItem(SKEY);
+    vcData={};
+    buildQueue(); window.updateVStats();
+    document.getElementById('vc-settings').classList.remove('open');
+    document.getElementById('btn-vc-settings').classList.remove('open');
+    window.startVocab();
+  });
+  document.getElementById('btn-vc-settings').addEventListener('click',()=>{
+    document.getElementById('vc-settings').classList.toggle('open');
+    document.getElementById('btn-vc-settings').classList.toggle('open');
+    document.getElementById('vc-due-list').classList.remove('open');
+  });
+
+  // due word list
+  document.getElementById('vc-due-toggle').addEventListener('click',()=>{
+    const panel=document.getElementById('vc-due-list');
+    if(panel.classList.toggle('open')){
+      const data=vLoad(),now=Date.now(),items=document.getElementById('vc-due-items');
+      items.innerHTML='';
+      let count=0;
+      VOCAB.forEach((w,i)=>{
+        const c=data[i]||{d:0,r:0};
+        if((c.r>0||(c.r===0&&c.d>0))&&c.d<=now){
+          count++;
+          const d=document.createElement('div'); d.className='vc-due-item';
+          d.innerHTML=`<span class="vc-due-kr">${w.kr}</span><span class="vc-due-en">${w.en}</span>`;
+          items.appendChild(d);
+        }
+      });
+      document.getElementById('vc-due-count').textContent=count;
+      if(!count) items.innerHTML='<p style="color:var(--muted);font-size:13px;margin:0">No words due right now.</p>';
+    }
+    document.getElementById('vc-settings').classList.remove('open');
+    document.getElementById('btn-vc-settings').classList.remove('open');
+  });
+
+  // Space = flip, 1-4 = rate (when vocab panel is active)
+  document.addEventListener('keydown',e=>{
+    if(document.getElementById('vocab-wrap').style.display==='none') return;
+    if(e.key===' '){ e.preventDefault(); flipCard(); }
+    if(vcFlipped){
+      if(e.key==='1') rateCard(1);
+      if(e.key==='2') rateCard(2);
+      if(e.key==='3') rateCard(3);
+      if(e.key==='4') rateCard(4);
+    }
+  });
+
+  window.updateVStats();
+})();
+
+// ── Mistakes review panel ─────────────────────────────────
+window.showReview=function(){
+  document.getElementById('vocab-wrap').style.display='none';
+  document.getElementById('exercise-wrap').style.display='block';
+  document.getElementById('empty').style.display='none';
+  document.getElementById('lesson-header').style.display='none';
+  document.getElementById('ex-card').style.display='none';
+  document.getElementById('prog-bar-wrap').style.display='none';
+  document.getElementById('actions').style.display='none';
+  document.getElementById('all-done').style.display='none';
+  document.getElementById('review-wrap').style.display='block';
+  document.querySelectorAll('.lesson-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('review-nav-btn').classList.add('active');
+  renderReview();
+};
+function renderReview(){
+  const list=document.getElementById('review-list');
+  const all=loadMistakes();
+  if(!all.length){
+    list.innerHTML='<div id="review-empty"><p style="font-size:18px">No mistakes logged yet!</p><small>Mistakes from completed lessons will appear here.</small></div>';
+    return;
+  }
+  // group by lesson title
+  const groups={};
+  all.forEach((m,i)=>{
+    const k=m.title||m.lid;
+    if(!groups[k]) groups[k]=[];
+    groups[k].push({...m,idx:i});
+  });
+  list.innerHTML='';
+  Object.entries(groups).forEach(([title,items])=>{
+    const sec=document.createElement('div'); sec.className='rev-lesson';
+    sec.innerHTML=`<div class="rev-lesson-title">${escHtml(title)}</div>`;
+    items.forEach(m=>{
+      const typeLabels={translate:'Translate',wordbank:'Word Bank',fillinblank:'Fill in the Blank'};
+      const typeColors={translate:'#a8d8ea',wordbank:'#f4a261',fillinblank:'#4ecca3'};
+      const typeBadge=m.type?`<span style="font-size:10px;background:#1e1e36;color:${typeColors[m.type]||'var(--muted)'};border-radius:4px;padding:1px 7px;margin-bottom:6px;display:inline-block">${typeLabels[m.type]||m.type}</span>`:''
+      const hintLine=m.hint?`<div style="font-size:11px;color:var(--muted);font-style:italic;margin-top:3px">Hint: ${escHtml(m.hint)}</div>`:'';
+      const d=document.createElement('div'); d.className='rev-item';
+      d.innerHTML=`<div class="rev-item-body">${typeBadge}<div class="rev-prompt">${escHtml(m.prompt)}</div>${hintLine}<div style="margin-top:6px"><span class="rev-yours">${escHtml(m.yours)}</span><span class="rev-correct">${escHtml(m.correct)}</span></div><div class="rev-date">${m.date||''}</div></div><button class="rev-del" data-idx="${m.idx}" title="Remove">✕</button>`;
+      sec.appendChild(d);
+    });
+    list.appendChild(sec);
+  });
+  list.querySelectorAll('.rev-del').forEach(btn=>btn.addEventListener('click',()=>{
+    const arr=loadMistakes(); arr.splice(+btn.dataset.idx,1); saveMistakes(arr);
+    renderMistakeBadge(); renderReview();
+  }));
+}
+document.getElementById('btn-clear-all').addEventListener('click',()=>{
+  if(!confirm('Clear all logged mistakes?')) return;
+  saveMistakes([]); renderMistakeBadge(); renderReview();
+});
+renderMistakeBadge();
+
+// ── Korean virtual keyboard ───────────────────────────────
+(function(){
+  const CHO  = ['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+  const JUNG = ['ㅏ','ㅐ','ㅑ','ㅒ','ㅓ','ㅔ','ㅕ','ㅖ','ㅗ','ㅘ','ㅙ','ㅚ','ㅛ','ㅜ','ㅝ','ㅞ','ㅟ','ㅠ','ㅡ','ㅢ','ㅣ'];
+  const JONG = ['','ㄱ','ㄲ','ㄳ','ㄴ','ㄵ','ㄶ','ㄷ','ㄹ','ㄺ','ㄻ','ㄼ','ㄽ','ㄾ','ㄿ','ㅀ','ㅁ','ㅂ','ㅄ','ㅅ','ㅆ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+  const CI={}; CHO.forEach((c,i)=>CI[c]=i);
+  const VI={}; JUNG.forEach((c,i)=>VI[c]=i);
+  // simple consonants that can be 종성, mapped to their JONG index
+  const JI={ㄱ:1,ㄲ:2,ㄴ:4,ㄷ:7,ㄹ:8,ㅁ:16,ㅂ:17,ㅅ:19,ㅆ:20,ㅇ:21,ㅈ:22,ㅊ:23,ㅋ:24,ㅌ:25,ㅍ:26,ㅎ:27};
+  // compound 종성: 'existingJongIdx+newJongIdx' → result idx
+  const JC={'1+19':3,'4+22':5,'4+27':6,'8+1':9,'8+16':10,'8+17':11,'8+19':12,'8+25':13,'8+26':14,'8+27':15,'17+19':18};
+  // compound 종성 split when vowel follows: jongIdx → [keepJongIdx, newChoJamo]
+  const JS_={3:[1,'ㅅ'],5:[4,'ㅈ'],6:[4,'ㅎ'],9:[8,'ㄱ'],10:[8,'ㅁ'],11:[8,'ㅂ'],12:[8,'ㅅ'],13:[8,'ㅌ'],14:[8,'ㅍ'],15:[8,'ㅎ'],18:[17,'ㅅ']};
+  // compound vowel: 'existingVowelIdx+newVowelIdx' → result idx
+  const VC={'8+0':9,'8+1':10,'8+20':11,'13+4':14,'13+5':15,'13+20':16,'18+20':19};
+  // compound vowel undo on backspace: vowelIdx → simplerIdx
+  const VS_={9:8,10:8,11:8,14:13,15:13,16:13,19:18};
+
+  function mk(c,v,j){ return String.fromCharCode(0xAC00+(c*21+v)*28+j); }
+
+  let base='',committed='',comp=null,kbEl=null;
+  // comp = { c:choIdx, v:jungIdx(-1=none), j:jongIdx(0=none) }
+
+  function cur(){
+    if(!comp) return '';
+    if(comp.v<0) return CHO[comp.c];
+    return mk(comp.c,comp.v,comp.j);
+  }
+  function getVal(){ return committed+cur(); }
+  function commitComp(){ committed+=cur(); comp=null; }
+
+  function inp(jamo){
+    const vi=VI[jamo];
+    if(vi!==undefined){
+      if(!comp){
+        comp={c:11,v:vi,j:0}; // bare vowel uses silent ㅇ initial
+      } else if(comp.v<0){
+        comp.v=vi;
+      } else if(comp.j===0){
+        const k=comp.v+'+'+vi;
+        if(VC[k]!==undefined) comp.v=VC[k];
+        else{ commitComp(); comp={c:11,v:vi,j:0}; }
+      } else {
+        // vowel splits the 종성: it moves to become the next syllable's initial
+        if(JS_[comp.j]){
+          const[kj,nc]=JS_[comp.j];
+          committed+=mk(comp.c,comp.v,kj);
+          comp={c:CI[nc],v:vi,j:0};
+        } else {
+          committed+=mk(comp.c,comp.v,0);
+          comp={c:CI[JONG[comp.j]],v:vi,j:0};
+        }
+      }
+    } else {
+      const ji=JI[jamo];
+      const ci=CI[jamo]!==undefined?CI[jamo]:0;
+      if(!comp){
+        comp={c:ci,v:-1,j:0};
+      } else if(comp.v<0){
+        commitComp(); comp={c:ci,v:-1,j:0};
+      } else if(comp.j===0&&ji!==undefined){
+        comp.j=ji;
+      } else if(comp.j>0&&ji!==undefined){
+        const k=comp.j+'+'+ji;
+        if(JC[k]!==undefined) comp.j=JC[k];
+        else{ commitComp(); comp={c:ci,v:-1,j:0}; }
+      } else {
+        commitComp(); comp={c:ci,v:-1,j:0};
+      }
+    }
+    push();
+  }
+
+  function bksp(){
+    if(comp){
+      if(comp.j>0){
+        if(JS_[comp.j]) comp.j=JS_[comp.j][0]; else comp.j=0;
+      } else if(comp.v>=0){
+        if(VS_[comp.v]!==undefined) comp.v=VS_[comp.v]; else comp.v=-1;
+      } else { comp=null; }
+    } else if(committed.length){
+      committed=committed.slice(0,-1);
+    } else {
+      base=base.slice(0,-1);
+    }
+    push();
+  }
+
+  function spc(){ commitComp(); committed+=' '; push(); }
+
+  function push(){
+    if(!kbEl) return;
+    kbEl.value=base+getVal();
+    kbEl.dispatchEvent(new Event('input'));
+  }
+
+  function attach(el){
+    if(kbEl===el) return;
+    kbEl=el; base=el.value; committed=''; comp=null;
+  }
+
+  window.KorKB={
+    reset(){ committed=''; comp=null; base=''; kbEl=null; },
+    attach
+  };
+
+  // ── Build keyboard DOM ────────────────────────────────
+  const ROWS=[
+    [{n:'ㅂ',s:'ㅃ'},{n:'ㅈ',s:'ㅉ'},{n:'ㄷ',s:'ㄸ'},{n:'ㄱ',s:'ㄲ'},{n:'ㅅ',s:'ㅆ'},null,
+     {n:'ㅛ'},{n:'ㅕ'},{n:'ㅑ'},{n:'ㅐ',s:'ㅒ'},{n:'ㅔ',s:'ㅖ'}],
+    [{n:'ㅁ'},{n:'ㄴ'},{n:'ㅇ'},{n:'ㄹ'},{n:'ㅎ'},null,{n:'ㅗ'},{n:'ㅓ'},{n:'ㅏ'},{n:'ㅣ'}],
+    [{n:'ㅋ'},{n:'ㅌ'},{n:'ㅊ'},{n:'ㅍ'},null,{n:'ㅠ'},{n:'ㅜ'},{n:'ㅡ'}],
+  ];
+
+  let shifted=false;
+  const kb=document.getElementById('kor-kb');
+
+  function renderKey(btn){
+    const n=btn.dataset.n,s=btn.dataset.s;
+    const main=shifted&&s?s:n;
+    const sub=shifted&&s?n:s;
+    btn.innerHTML=main+(sub?`<span class="ks">${sub}</span>`:'');
+  }
+
+  function buildKB(){
+    ROWS.forEach(row=>{
+      const rd=document.createElement('div'); rd.className='kb-row';
+      row.forEach(k=>{
+        if(!k){const sep=document.createElement('div');sep.className='kb-sep';rd.appendChild(sep);return;}
+        const b=document.createElement('button'); b.className='kb-key';
+        b.dataset.n=k.n; if(k.s)b.dataset.s=k.s;
+        renderKey(b);
+        b.addEventListener('mousedown',e=>{
+          e.preventDefault(); // keep focus on text input
+          const jamo=shifted&&k.s?k.s:k.n;
+          if(shifted){shifted=false;document.querySelectorAll('.kb-key[data-n]').forEach(renderKey);document.getElementById('kb-shift').classList.remove('kb-on');}
+          inp(jamo);
+        });
+        rd.appendChild(b);
+      });
+      kb.appendChild(rd);
+    });
+    const bot=document.createElement('div'); bot.className='kb-row';
+    const shb=document.createElement('button'); shb.className='kb-key kb-special'; shb.id='kb-shift'; shb.textContent='⇧ Shift';
+    shb.addEventListener('mousedown',e=>{
+      e.preventDefault(); shifted=!shifted;
+      shb.classList.toggle('kb-on',shifted);
+      document.querySelectorAll('.kb-key[data-n]').forEach(renderKey);
+    });
+    const spb=document.createElement('button'); spb.className='kb-key kb-special kb-space'; spb.textContent='Space';
+    spb.addEventListener('mousedown',e=>{e.preventDefault();spc();});
+    const bkb=document.createElement('button'); bkb.className='kb-key kb-special'; bkb.textContent='⌫';
+    bkb.addEventListener('mousedown',e=>{e.preventDefault();bksp();});
+    bot.append(shb,spb,bkb);
+    kb.appendChild(bot);
+  }
+
+  let visible=false;
+  document.getElementById('btn-kb').addEventListener('click',()=>{
+    visible=!visible;
+    kb.style.display=visible?'block':'none';
+    document.getElementById('btn-kb').classList.toggle('on',visible);
+    document.getElementById('main').style.paddingBottom=visible?'230px':'32px';
+    if(visible){
+      const taVis=document.getElementById('translate-area').style.display!=='none';
+      const fiVis=document.getElementById('fib-area').style.display!=='none';
+      if(taVis) document.getElementById('translate-input').focus();
+      else if(fiVis) document.getElementById('fib-input').focus();
+    }
+  });
+
+  document.getElementById('translate-input').addEventListener('focus',function(){attach(this);});
+  document.getElementById('fib-input').addEventListener('focus',function(){attach(this);});
+
+  buildKB();
+})();
+</script>
+</body>
+</html>
