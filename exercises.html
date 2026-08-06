@@ -175,7 +175,6 @@ body{font-family:"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(
 .vcr:hover{opacity:.8}
 .vcr small{font-size:10px;font-weight:400;opacity:.75;margin-top:2px}
 #vcr-again{background:#3d1a1a;color:#ff6b6b;border:1px solid #ff6b6b44}
-#vcr-hard{background:#2d1f10;color:#f4a261;border:1px solid #f4a26144}
 #vcr-good{background:#1a3d2b;color:#4ecca3;border:1px solid #4ecca344}
 #vcr-easy{background:#1a2a45;color:var(--accent);border:1px solid #a8d8ea44}
 #vc-done{text-align:center;padding:60px 20px}
@@ -273,7 +272,7 @@ body{font-family:"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(
     <div id="vocab-wrap" style="display:none">
       <div id="vc-header">
         <div id="vc-title">📚 TOPIK I Vocabulary</div>
-        <div id="vc-stats"><span id="vc-due-toggle" title="Show due words">Due <b id="vs-due">–</b></span><span>New <b id="vs-new">–</b></span></div>
+        <div id="vc-stats"><span id="vc-due-toggle" title="Show due words">Due <b id="vs-due">–</b></span><span>New <b id="vs-new">–</b></span><span id="vc-progress" style="margin-left:auto;font-size:12px;color:var(--muted)"></span></div>
         <button id="btn-vc-settings" title="Settings">⚙</button>
       </div>
       <div id="vc-settings">
@@ -321,7 +320,6 @@ body{font-family:"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(
       </div>
       <div id="vc-rate-row">
         <button class="vcr" id="vcr-again">Again<small id="vi-again"></small></button>
-        <button class="vcr" id="vcr-hard">Hard<small id="vi-hard"></small></button>
         <button class="vcr" id="vcr-good">Good<small id="vi-good"></small></button>
         <button class="vcr" id="vcr-easy">Easy<small id="vi-easy"></small></button>
       </div>
@@ -1157,11 +1155,19 @@ buildSidebar();
     vcKrWord=word.kr;
     vcFlipped=false;
     vcCurrentDir=dir;
+    // disable transition so card snaps to front instantly instead of animating
+    const inner=document.getElementById('vc-inner');
+    inner.style.transition='none';
     el('vc-flash').classList.remove('flip');
+    inner.getBoundingClientRect();
+    inner.style.transition='';
+
+    const prog=document.getElementById('vc-progress');
+    if(prog) prog.textContent=vcQueue.length?(vcIdx+1)+' / '+vcQueue.length:'';
 
     el('vc-tag').textContent=dir==='en-kr'?'English → Korean':'Korean → English';
     el('vc-new-badge').style.display=isNew?'block':'none';
-    el('btn-vcflip').style.display='';;
+    el('btn-vcflip').style.display='';
     el('btn-vcflip').textContent='Flip ↓';
 
     const qEl=el('vc-q'),aEl=el('vc-ans');
@@ -1169,7 +1175,7 @@ buildSidebar();
     else { qEl.textContent=word.kr; qEl.className='kr'; aEl.textContent=word.en; aEl.className='en'; }
 
     const ivls=vNextIvls(c);
-    ['again','hard','good','easy'].forEach((k,i)=>{ el('vi-'+k).textContent=ivls[i]; });
+    [['again',0],['good',2],['easy',3]].forEach(([k,i])=>{ const e2=el('vi-'+k); if(e2) e2.textContent=ivls[i]; });
   }
 
   function flipCard(){
@@ -1207,7 +1213,6 @@ buildSidebar();
   document.getElementById('btn-vcflip').addEventListener('click',flipCard);
   document.getElementById('btn-vcaudio').addEventListener('click',()=>speakKorean(vcKrWord));
   document.getElementById('vcr-again').addEventListener('click',()=>rateCard(1));
-  document.getElementById('vcr-hard').addEventListener('click',()=>rateCard(2));
   document.getElementById('vcr-good').addEventListener('click',()=>rateCard(3));
   document.getElementById('vcr-easy').addEventListener('click',()=>rateCard(4));
   document.getElementById('btn-vc-restart').addEventListener('click',window.startVocab);
@@ -1264,9 +1269,8 @@ buildSidebar();
     if(e.key===' '){ e.preventDefault(); flipCard(); }
     if(vcFlipped){
       if(e.key==='1') rateCard(1);
-      if(e.key==='2') rateCard(2);
-      if(e.key==='3') rateCard(3);
-      if(e.key==='4') rateCard(4);
+      if(e.key==='2') rateCard(3);
+      if(e.key==='3') rateCard(4);
     }
   });
 
