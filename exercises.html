@@ -1157,6 +1157,7 @@ buildSidebar();
     vcKrWord=word.kr;
     vcFlipped=false;
     vcCurrentDir=dir;
+    el('vc-flash').classList.remove('flip');
 
     el('vc-tag').textContent=dir==='en-kr'?'English → Korean':'Korean → English';
     el('vc-new-badge').style.display=isNew?'block':'none';
@@ -1184,7 +1185,7 @@ buildSidebar();
     const wi=vcQueue[vcIdx];
     const c=Object.assign({},vCard(wi));
     vSchedule(c,rating); vcData[wi]=c; vSave();
-    vcIdx++; showVCard();
+    vcIdx++; showVCard(); window.updateVStats();
   }
 
   window.startVocab=function(){
