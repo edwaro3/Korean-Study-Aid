@@ -196,6 +196,14 @@ body{font-family:"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(
 #kb-shift.kb-on{background:#1a2a45;border-color:var(--accent);color:var(--accent)}
 #btn-kb{background:none;border:1px solid var(--border);border-radius:6px;color:var(--muted);cursor:pointer;font-size:12px;padding:4px 10px;transition:background .2s,color .2s;white-space:nowrap}
 #btn-kb.on{background:#1a2a45;border-color:var(--accent);color:var(--accent)}
+#fb-auth{display:flex;align-items:center;gap:6px;margin-left:6px}
+#btn-signin{background:none;border:1px solid var(--border);border-radius:6px;color:var(--muted);cursor:pointer;font-size:12px;padding:4px 10px;white-space:nowrap;transition:background .2s,color .2s}
+#btn-signin:hover{background:#ffffff0d;color:var(--text)}
+#fb-user{display:none;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
+#fb-avatar{width:22px;height:22px;border-radius:50%}
+#btn-signout{background:none;border:none;color:var(--muted);cursor:pointer;font-size:11px;padding:2px 6px}
+#btn-signout:hover{color:#ff6b6b}
+#fb-sync{font-size:10px;opacity:.65}
 </style>
 </head>
 <body>
@@ -204,6 +212,10 @@ body{font-family:"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(
   <span id="ime-tip">💡 Win: Win+Space → Korean IME &nbsp;|&nbsp; Mac: Ctrl+Space</span>
   <div id="score-box">Session: <span id="sc-correct">0</span> / <span id="sc-total">0</span></div>
   <button id="btn-kb" title="Toggle Korean keyboard">⌨ 한글</button>
+  <div id="fb-auth">
+    <button id="btn-signin">☁ Sign in</button>
+    <div id="fb-user"><img id="fb-avatar" src="" alt=""><span id="fb-name"></span><span id="fb-sync"></span><button id="btn-signout">Sign out</button></div>
+  </div>
 </div>
 <div id="app">
   <nav id="sidebar"></nav>
@@ -323,6 +335,9 @@ body{font-family:"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(
   </main>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <div id="kor-kb"></div>
 <script src="vocab_data.js"></script>
 <script>
@@ -703,12 +718,12 @@ let lessonWrong = [];
 
 // ── Progress storage ──────────────────────────────────────
 function loadProgress(lid){ try{return JSON.parse(localStorage.getItem("kp_"+lid))||{c:0,t:0};}catch{return{c:0,t:0};}}
-function saveProgress(lid,c,t){ try{localStorage.setItem("kp_"+lid,JSON.stringify({c,t}));}catch{}}
+function saveProgress(lid,c,t){ try{localStorage.setItem("kp_"+lid,JSON.stringify({c,t}));}catch{} if(window.cloudSync)window.cloudSync('kp_'+lid,JSON.stringify({c,t})); }
 function isComplete(lid){ const p=loadProgress(lid); return p.t>0 && p.c/p.t>=0.8; }
 
 const MKEY='topik_mistakes';
 function loadMistakes(){ try{return JSON.parse(localStorage.getItem(MKEY))||[];}catch{return[];} }
-function saveMistakes(arr){ try{localStorage.setItem(MKEY,JSON.stringify(arr));}catch{} }
+function saveMistakes(arr){ try{localStorage.setItem(MKEY,JSON.stringify(arr));}catch{} if(window.cloudSync)window.cloudSync(MKEY,JSON.stringify(arr)); }
 function appendMistakes(items,lid){
   if(!items.length) return;
   const lesson=LESSONS.find(l=>l.id===lid);
@@ -1049,7 +1064,7 @@ buildSidebar();
   let vcMaxReviews=vcSettings.maxReviews||0;
 
   function vLoad(){ try{return JSON.parse(localStorage.getItem(SKEY))||{};}catch{return{};} }
-  function vSave(){ try{localStorage.setItem(SKEY,JSON.stringify(vcData));}catch{} }
+  function vSave(){ try{localStorage.setItem(SKEY,JSON.stringify(vcData));}catch{} if(window.cloudSync)window.cloudSync(SKEY,JSON.stringify(vcData)); }
   function vCard(i){ return vcData[i]||{d:0,i:0,e:2.5,r:0}; }
 
   function fmtIvl(d){
@@ -1201,7 +1216,7 @@ buildSidebar();
   const setRev=document.getElementById('set-max-reviews');
   setNew.value=vcNewPerDay;
   setRev.value=vcMaxReviews||'';
-  function saveSetting(){ vcSettings.newPerDay=vcNewPerDay; vcSettings.maxReviews=vcMaxReviews; try{localStorage.setItem(SKEY_SET,JSON.stringify(vcSettings));}catch{} }
+  function saveSetting(){ vcSettings.newPerDay=vcNewPerDay; vcSettings.maxReviews=vcMaxReviews; try{localStorage.setItem(SKEY_SET,JSON.stringify(vcSettings));}catch{} if(window.cloudSync)window.cloudSync(SKEY_SET,JSON.stringify(vcSettings)); }
   setNew.addEventListener('change',()=>{ vcNewPerDay=Math.max(1,+setNew.value||20); saveSetting(); });
   setRev.addEventListener('change',()=>{ vcMaxReviews=Math.max(0,+setRev.value||0); saveSetting(); });
   document.getElementById('btn-vc-reset').addEventListener('click',()=>{
@@ -1311,6 +1326,77 @@ document.getElementById('btn-clear-all').addEventListener('click',()=>{
   saveMistakes([]); renderMistakeBadge(); renderReview();
 });
 renderMistakeBadge();
+
+// ── Firebase cloud sync ───────────────────────────────────────────────────
+(function(){
+  const firebaseConfig={
+    apiKey:'AIzaSyBiwbyj2puRGv2nqH5rmISJvz0K6B0mWPI',
+    authDomain:'korean-study-aid.firebaseapp.com',
+    projectId:'korean-study-aid',
+    storageBucket:'korean-study-aid.firebasestorage.app',
+    messagingSenderId:'799640475109',
+    appId:'1:799640475109:web:3deab38b5ab1485db3cb0c'
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth=firebase.auth();
+  const db=firebase.firestore();
+  let fbUser=null;
+
+  function syncStatus(msg,color){
+    const el=document.getElementById('fb-sync');
+    if(el){el.textContent=msg;el.style.color=color||'var(--muted)';}
+  }
+
+  function userDoc(){ return db.collection('users').doc(fbUser.uid).collection('app').doc('data'); }
+
+  window.cloudSync=async function(key,value){
+    if(!fbUser) return;
+    try{ await userDoc().set({[key]:value},{merge:true}); syncStatus('✓ synced','#4ecca3'); }
+    catch(e){ syncStatus('⚠ sync err','#f4a261'); }
+  };
+
+  async function pullFromCloud(){
+    try{
+      syncStatus('↓ loading...','var(--muted)');
+      const doc=await userDoc().get();
+      if(doc.exists){
+        Object.entries(doc.data()).forEach(([k,v])=>localStorage.setItem(k,v));
+        syncStatus('✓ synced','#4ecca3');
+      } else {
+        const data={};
+        ['topik_srs','topik_settings','topik_mistakes'].forEach(k=>{ const v=localStorage.getItem(k); if(v) data[k]=v; });
+        for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k&&k.startsWith('kp_')) data[k]=localStorage.getItem(k); }
+        if(Object.keys(data).length) await userDoc().set(data);
+        syncStatus('✓ synced','#4ecca3');
+      }
+      if(typeof window.updateVStats==='function') window.updateVStats();
+      if(typeof buildSidebar==='function') buildSidebar();
+    } catch(e){ syncStatus('⚠ load err','#f4a261'); }
+  }
+
+  auth.onAuthStateChanged(user=>{
+    fbUser=user;
+    const signinBtn=document.getElementById('btn-signin');
+    const userDiv=document.getElementById('fb-user');
+    if(user){
+      signinBtn.style.display='none';
+      userDiv.style.display='flex';
+      document.getElementById('fb-name').textContent=user.displayName?user.displayName.split(' ')[0]:'';
+      const av=document.getElementById('fb-avatar');
+      av.src=user.photoURL||''; av.style.display=user.photoURL?'block':'none';
+      pullFromCloud();
+    } else {
+      signinBtn.style.display='';
+      userDiv.style.display='none';
+      syncStatus('','');
+    }
+  });
+
+  document.getElementById('btn-signin').addEventListener('click',()=>{
+    auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e=>console.error(e));
+  });
+  document.getElementById('btn-signout').addEventListener('click',()=>auth.signOut());
+})();
 
 // ── Korean virtual keyboard ───────────────────────────────
 (function(){
