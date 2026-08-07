@@ -1436,7 +1436,10 @@ renderMistakeBadge();
   // handle redirect result on page load (from signInWithRedirect)
   auth.getRedirectResult().then(result=>{
     if(result && result.user) pullFromCloud();
-  }).catch(e=>console.error(e));
+  }).catch(e=>{
+    syncStatus('⚠ '+e.code,'#f4a261');
+    console.error('getRedirectResult error:',e);
+  });
 
   document.getElementById('btn-signin').addEventListener('click',()=>{
     const provider=new firebase.auth.GoogleAuthProvider();
