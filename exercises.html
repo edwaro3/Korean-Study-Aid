@@ -1444,7 +1444,9 @@ renderMistakeBadge();
   document.getElementById('btn-signin').addEventListener('click',()=>{
     const provider=new firebase.auth.GoogleAuthProvider();
     syncStatus('signing in...','var(--muted)');
-    auth.signInWithRedirect(provider).catch(e=>{
+    const isIOS=/iPhone|iPad|iPod/i.test(navigator.userAgent);
+    const method=isIOS?auth.signInWithPopup(provider):auth.signInWithRedirect(provider);
+    Promise.resolve(method).catch(e=>{
       syncStatus('⚠ '+e.code,'#f4a261');
       console.error(e);
     });
