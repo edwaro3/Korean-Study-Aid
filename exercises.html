@@ -1263,6 +1263,7 @@ buildSidebar();
     if(!confirm('Reset all SRS progress? This cannot be undone.')) return;
     localStorage.removeItem(SKEY);
     vcData={};
+    vSave(); // sync empty state to cloud
     buildQueue(); window.updateVStats();
     document.getElementById('vc-settings').classList.remove('open');
     document.getElementById('btn-vc-settings').classList.remove('open');
@@ -1377,7 +1378,7 @@ renderMistakeBadge();
     messagingSenderId:'799640475109',
     appId:'1:799640475109:web:3deab38b5ab1485db3cb0c'
   };
-  firebase.initializeApp(firebaseConfig);
+  firebase.apps.length ? firebase.app() : firebase.initializeApp(firebaseConfig);
   const auth=firebase.auth();
   const db=firebase.firestore();
   let fbUser=null;
@@ -1438,7 +1439,12 @@ renderMistakeBadge();
   }).catch(e=>console.error(e));
 
   document.getElementById('btn-signin').addEventListener('click',()=>{
-    auth.signInWithRedirect(new firebase.auth.GoogleAuthProvider()).catch(e=>console.error(e));
+    const provider=new firebase.auth.GoogleAuthProvider();
+    syncStatus('signing in...','var(--muted)');
+    auth.signInWithRedirect(provider).catch(e=>{
+      syncStatus('⚠ '+e.code,'#f4a261');
+      console.error(e);
+    });
   });
   document.getElementById('btn-signout').addEventListener('click',()=>auth.signOut());
 })();
